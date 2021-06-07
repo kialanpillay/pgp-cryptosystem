@@ -1,11 +1,16 @@
-import java.io.*;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ClientHandler extends Thread {
 
+    private static final Logger logger = Logger.getLogger(Server.class.getName());
     private final Socket socket;
     private final Server server;
-    private PrintWriter writer;
+    private ObjectOutputStream outputStream;
 
     public ClientHandler(Socket socket, Server server) {
         this.socket = socket;
@@ -14,30 +19,33 @@ public class ClientHandler extends Thread {
 
     public void run() {
         try {
-            InputStream input = socket.getInputStream();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+            ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream());
+            outputStream = new ObjectOutputStream(socket.getOutputStream());
 
-            OutputStream output = socket.getOutputStream();
-            writer = new PrintWriter(output, true);
-            String message;
-
+            Message message;
             do {
-                message = reader.readLine();
-                // Construct Message
-                server.deliver(message, this);
+                try {
+                    message = (Message) inputStream.readObject();
+                } catch (IOException | ClassNotFoundException ex) {
+                    logger.log(Level.WARNING, ex.getMessage());
+                    break;
+                }
 
-            } while (!message.equals("quit"));
+                if (!message.getCaption().equals("quit")) {
+                    server.deliver(message, this);
+                }
+
+            } while (!message.getCaption().equals("quit"));
 
             server.terminateHandlers();
             socket.close();
 
         } catch (IOException ex) {
-            System.out.println(ex.getMessage());
-            ex.printStackTrace();
+            logger.log(Level.WARNING, ex.getMessage());
         }
     }
 
-    void sendMessage(String message) {
-        writer.println(message);
+    public void sendMessage(Message message) throws IOException {
+        outputStream.writeObject(message);
     }
 }

@@ -3,9 +3,12 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Server {
 
+    private static final Logger logger = Logger.getLogger(Server.class.getName());
     private final int port;
     private final Set<ClientHandler> handlers = new HashSet<>();
 
@@ -25,32 +28,32 @@ public class Server {
     public void listen() {
         try (ServerSocket serverSocket = new ServerSocket(port)) {
 
-            System.out.println("Server is listening on port " + port);
+            logger.info("Server listening on port " + port);
 
             while (true) {
                 Socket socket = serverSocket.accept();
-                System.out.println("Client: " + socket);
+                logger.info("Created socket at port " + socket.getPort());
                 ClientHandler handler = new ClientHandler(socket, this);
                 handlers.add(handler);
                 handler.start();
             }
 
         } catch (IOException ex) {
-            System.out.println("Error starting the server: " + ex.getMessage());
+            logger.log(Level.SEVERE, ex.getMessage());
             ex.printStackTrace();
         }
     }
 
-    public void deliver(String message, ClientHandler excludeUser) {
+    public void deliver(Message message, ClientHandler source) throws IOException {
         for (ClientHandler handler : handlers) {
-            if (handler != excludeUser) {
+            if (handler != source) {
                 handler.sendMessage(message);
             }
         }
     }
 
     public void terminateHandlers() {
-        System.out.println("Session Terminated");
+        logger.info("Communication session terminated");
         handlers.clear();
     }
 }

@@ -3,13 +3,17 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Client {
 
+    private static final Logger logger = Logger.getLogger(Server.class.getName());
+    private static final Prettier prettier = new Prettier();
     private final String hostname;
     private final int port;
     private String username;
+    private String directory;
 
     public Client(String hostname, int port) {
         this.hostname = hostname;
@@ -25,15 +29,25 @@ public class Client {
         Client client = new Client(hostname, port);
 
         String username = "";
-        System.out.println("Enter Username: ");
-        BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
+        String path = "";
+        BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
+
+        prettier.print("System", "Username? ");
         try {
-            username = input.readLine();
+            username = stdin.readLine();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        client.setUsername(username);
 
+        prettier.print("System", "Directory? ");
+        try {
+            path = stdin.readLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        client.setUsername(username);
+        client.setDirectory(path);
         client.connect();
     }
 
@@ -44,11 +58,19 @@ public class Client {
             new Receive(socket, this).start();
 
         } catch (UnknownHostException ex) {
-            System.out.println("Server not found: " + ex.getMessage());
+            logger.log(Level.SEVERE, ex.getMessage());
         } catch (IOException ex) {
-            System.out.println("I/O Error: " + ex.getMessage());
+            logger.log(Level.SEVERE, ex.getMessage());
         }
 
+    }
+
+    public String getDirectory() {
+        return directory;
+    }
+
+    public void setDirectory(String path) {
+        this.directory = path;
     }
 
     public String getUsername() {

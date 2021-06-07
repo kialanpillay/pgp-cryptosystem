@@ -1,22 +1,21 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.Socket;
+import java.util.Base64;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Receive extends Thread {
 
+    private static final Logger logger = Logger.getLogger(Server.class.getName());
     private final Socket socket;
-    private BufferedReader reader;
     private final Client client;
+    private ObjectInputStream inputStream;
 
     public Receive(Socket socket, Client client) {
-
         this.socket = socket;
         this.client = client;
         try {
-            InputStream input = socket.getInputStream();
-            reader = new BufferedReader(new InputStreamReader(input));
+            inputStream = new ObjectInputStream(socket.getInputStream());
         } catch (IOException ex) {
             ex.printStackTrace();
         }
@@ -25,11 +24,16 @@ public class Receive extends Thread {
     public void run() {
         while (true) {
             try {
-                String response = reader.readLine();
-                System.out.println(response);
-            } catch (IOException ex) {
-                System.out.println("Error reading from server: " + ex.getMessage());
-                ex.printStackTrace();
+                Message message = (Message) inputStream.readObject();
+                byte[] data = Base64.getDecoder().decode(message.getBase64Image());
+                try (OutputStream stream = new FileOutputStream(client.getDirectory())) {
+                    stream.write(data);
+                } catch (IOException ex) {
+                    logger.log(Level.WARNING, ex.getMessage());
+                }
+                System.out.println(message.getCaption());
+            } catch (IOException | ClassNotFoundException ex) {
+                logger.log(Level.WARNING, ex.getMessage());
                 break;
             }
         }
