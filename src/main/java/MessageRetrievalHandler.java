@@ -1,17 +1,20 @@
-import java.io.*;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Base64;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class Receive extends Thread {
+public class MessageRetrievalHandler extends Thread {
 
     private static final Logger logger = Logger.getLogger(Server.class.getName());
     private final Socket socket;
     private final Client client;
     private ObjectInputStream inputStream;
 
-    public Receive(Socket socket, Client client) {
+    public MessageRetrievalHandler(Socket socket, Client client) {
         this.socket = socket;
         this.client = client;
         try {

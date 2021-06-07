@@ -7,7 +7,7 @@ import java.util.Base64;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class Send extends Thread {
+public class MessageDispatchHandler extends Thread {
 
     private static final Logger logger = Logger.getLogger(Server.class.getName());
     private static final Prettier prettier = new Prettier();
@@ -15,7 +15,7 @@ public class Send extends Thread {
     private final Client client;
     private ObjectOutputStream outputStream;
 
-    public Send(Socket socket, Client client) {
+    public MessageDispatchHandler(Socket socket, Client client) {
         this.socket = socket;
         this.client = client;
         try {
