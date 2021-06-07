@@ -21,7 +21,7 @@ public class Prettier {
                 .append("[")
                 .append(entity.toUpperCase())
                 .append("]")
-                .append(" : ")
+                .append(" - ")
                 .append(message));
     }
 }

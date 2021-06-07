@@ -29,7 +29,7 @@ public class Client {
         Client client = new Client(hostname, port);
 
         String username = "";
-        String path = "";
+        String dir = "";
         BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
 
         prettier.print("System", "Username? ");
@@ -41,21 +41,21 @@ public class Client {
 
         prettier.print("System", "Directory? ");
         try {
-            path = stdin.readLine();
+            dir = stdin.readLine();
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         client.setUsername(username);
-        client.setDirectory(path);
+        client.setDirectory(dir);
         client.connect();
     }
 
     public void connect() {
         try {
             Socket socket = new Socket(hostname, port);
-            new Send(socket, this).start();
-            new Receive(socket, this).start();
+            new MessageDispatchHandler(socket, this).start();
+            new MessageRetrievalHandler(socket, this).start();
 
         } catch (UnknownHostException ex) {
             logger.log(Level.SEVERE, ex.getMessage());
