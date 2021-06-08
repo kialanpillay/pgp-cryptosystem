@@ -2,6 +2,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -11,21 +13,34 @@ public class Client {
     private static final Prettier prettier = new Prettier();
     private final String hostname;
     private final int port;
+    private final Object certificate;
+    private KeyGenerator keyGenerator;
+    private KeyPair keyPair;
     private String username;
     private String path;
-    private Object certificate;
-    private Object recipientCertificate;
+    private Object otherCertificate;
     private boolean certificateExchanged;
-    private boolean recipientKeyAuthenticated;
+    private final boolean otherKeyAuthenticated;
 
     public Client(String hostname, int port) {
         this.hostname = hostname;
         this.port = port;
+        try {
+            this.keyGenerator = new KeyGenerator();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            this.keyPair = keyGenerator.generate(128);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
         //TODO
         this.certificate = null;
-        this.recipientCertificate = null;
+        this.otherCertificate = null;
         this.certificateExchanged = false;
-        this.recipientKeyAuthenticated = true;
+        this.otherKeyAuthenticated = false;
     }
 
     public static void main(String[] args) {
@@ -92,28 +107,24 @@ public class Client {
         return certificate;
     }
 
-    public Object getRecipientCertificate() {
-        return recipientCertificate;
+    public Object getOtherCertificate() {
+        return otherCertificate;
     }
 
-    public void setRecipientCertificate(Object recipientCertificate) {
-        this.recipientCertificate = recipientCertificate;
+    public void setOtherCertificate(Object otherCertificate) {
+        this.otherCertificate = otherCertificate;
         this.certificateExchanged = true;
     }
 
-    public boolean isRecipientKeyAuthenticated() {
-        return recipientKeyAuthenticated;
-    }
-
-    public void setRecipientKeyAuthenticated(boolean recipientKeyAuthenticated) {
-        this.recipientKeyAuthenticated = recipientKeyAuthenticated;
+    public boolean isOtherKeyAuthenticated() {
+        return otherKeyAuthenticated;
     }
 
     public boolean isCertificateExchanged() {
         return certificateExchanged;
     }
 
-    public void debug(String message){
+    public void debug(String message) {
         logger.info(message);
     }
 }
