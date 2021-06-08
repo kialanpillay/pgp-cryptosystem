@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 public class Server {
 
     private static final Logger logger = Logger.getLogger(Server.class.getName());
+    private static final Prettier prettier = new Prettier();
     private final int port;
     private final Set<ClientHandler> handlers = new HashSet<>();
     private Session session;
@@ -56,6 +57,12 @@ public class Server {
         }
     }
 
+    public void broadcast(String message) throws IOException {
+        for (ClientHandler handler : handlers) {
+            handler.write(message);
+        }
+    }
+
     public void deliverCertificate(String username, ClientHandler source) throws IOException {
         for (ClientHandler handler : handlers) {
             if (handler != source) {
@@ -85,8 +92,13 @@ public class Server {
         boolean disconnect = session.disconnectClient(username);
         if (disconnect) {
             handlers.remove(handler);
-            terminateSession();
             logger.info("Client " + username + " has disconnected");
+            try {
+                broadcast(prettier.toString("Server", username + " has left the matrix."));
+            } catch (IOException ex) {
+                logger.log(Level.WARNING, ex.getMessage());
+            }
+            terminateSession();
         }
 
     }
@@ -114,15 +126,11 @@ public class Server {
     public void initiateSession() {
         session.setAlive(true);
         logger.info("Session initiated");
-        logger.info("Session isActive: " + session.isActive());
-        logger.info("Session isAlive: " + session.isAlive());
     }
 
     public void activateSession() {
         session.setActive(true);
         logger.info("Session activated");
-        logger.info("Session isActive: " + session.isActive());
-        logger.info("Session isAlive: " + session.isAlive());
     }
 
     public void terminateSession() {
@@ -131,7 +139,7 @@ public class Server {
         logger.info("Session terminated");
     }
 
-    public void debug(String message){
-        logger.info(message);
+    public void kill() {
+        System.exit(0);
     }
 }

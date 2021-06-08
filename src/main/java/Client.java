@@ -2,6 +2,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -11,21 +13,34 @@ public class Client {
     private static final Prettier prettier = new Prettier();
     private final String hostname;
     private final int port;
+    private final Object certificate;
+    private KeyGenerator keyGenerator;
+    private KeyPair keyPair;
     private String username;
-    private String directory;
-    private Object certificate;
-    private Object recipientCertificate;
+    private String path;
+    private Object otherCertificate;
     private boolean certificateExchanged;
-    private boolean recipientKeyAuthenticated;
+    private final boolean otherKeyAuthenticated;
 
     public Client(String hostname, int port) {
         this.hostname = hostname;
         this.port = port;
+        try {
+            this.keyGenerator = new KeyGenerator();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            this.keyPair = keyGenerator.generate(128);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
         //TODO
         this.certificate = null;
-        this.recipientCertificate = null;
+        this.otherCertificate = null;
         this.certificateExchanged = false;
-        this.recipientKeyAuthenticated = false;
+        this.otherKeyAuthenticated = false;
     }
 
     public static void main(String[] args) {
@@ -37,25 +52,26 @@ public class Client {
         Client client = new Client(hostname, port);
 
         String username = "";
-        String dir = "";
+        String path = "";
         BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
 
-        prettier.print("System", "Username? ");
+        prettier.print("System", "Welcome to CryptoSystem. I transfer your images more securely than FaceBook.");
+        prettier.print("System", "Who are you?");
         try {
             username = stdin.readLine();
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        prettier.print("System", "Directory? ");
+        prettier.print("System", "Where shall I store your images?");
         try {
-            dir = stdin.readLine();
+            path = stdin.readLine();
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         client.setUsername(username);
-        client.setDirectory(dir);
+        client.setPath(path);
         client.connect();
     }
 
@@ -71,12 +87,12 @@ public class Client {
 
     }
 
-    public String getDirectory() {
-        return directory;
+    public String getPath() {
+        return path;
     }
 
-    public void setDirectory(String path) {
-        this.directory = path;
+    public void setPath(String path) {
+        this.path = path;
     }
 
     public String getUsername() {
@@ -91,28 +107,24 @@ public class Client {
         return certificate;
     }
 
-    public Object getRecipientCertificate() {
-        return recipientCertificate;
+    public Object getOtherCertificate() {
+        return otherCertificate;
     }
 
-    public void setRecipientCertificate(Object recipientCertificate) {
-        this.recipientCertificate = recipientCertificate;
+    public void setOtherCertificate(Object otherCertificate) {
+        this.otherCertificate = otherCertificate;
         this.certificateExchanged = true;
     }
 
-    public boolean isRecipientKeyAuthenticated() {
-        return recipientKeyAuthenticated;
-    }
-
-    public void setRecipientKeyAuthenticated(boolean recipientKeyAuthenticated) {
-        this.recipientKeyAuthenticated = recipientKeyAuthenticated;
+    public boolean isOtherKeyAuthenticated() {
+        return otherKeyAuthenticated;
     }
 
     public boolean isCertificateExchanged() {
         return certificateExchanged;
     }
 
-    public void debug(String message){
+    public void debug(String message) {
         logger.info(message);
     }
 }

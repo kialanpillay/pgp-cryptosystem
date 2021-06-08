@@ -24,4 +24,16 @@ public class Prettier {
                 .append(" - ")
                 .append(message));
     }
+
+    public String toString(String entity, String message) {
+        StringBuilder stringBuilder = new StringBuilder();
+        return stringBuilder
+                .append(sdf.format(new Date()))
+                .append(" ")
+                .append("[")
+                .append(entity.toUpperCase())
+                .append("]")
+                .append(" - ")
+                .append(message).toString();
+    }
 }

@@ -30,8 +30,34 @@ public class ClientHandler extends Thread {
             certificate = inputStream.readObject().toString();
             server.storeCertificate(certificate, username);
 
-            while (true) {
+            while (!server.isSessionAlive()) {
+                Thread.sleep(100);
+            }
 
+            if (server.isSessionAlive()) {
+                if (!server.isSessionCertificateDelivered(username)) {
+                    server.deliverCertificate(username, this);
+                }
+                try {
+                    Object message = inputStream.readObject();
+
+                    if (message instanceof AuthenticateMessage) {
+                        server.authenticateClient();
+                    }
+
+                    if (server.getSessionAuthenticatedClients().get() == 2) {
+                        server.activateSession();
+                    }
+
+                } catch (IOException | ClassNotFoundException ex) {
+                    logger.log(Level.WARNING, ex.getMessage());
+                    server.kill();
+
+                }
+            }
+
+
+            while (true) {
                 if (server.isSessionActive()) {
                     try {
 
@@ -42,7 +68,6 @@ public class ClientHandler extends Thread {
                             } catch (IOException | ClassNotFoundException ex) {
                                 logger.log(Level.WARNING, ex.getMessage());
                             }
-
                             if (message instanceof Message) {
                                 Message m = (Message) message;
                                 server.deliver(m, this);
@@ -50,42 +75,24 @@ public class ClientHandler extends Thread {
 
                         } while (message instanceof Message);
 
-                        server.terminateSession();
+
                         server.disconnectClient(username, this);
                         socket.close();
 
                     } catch (IOException ex) {
                         logger.log(Level.WARNING, ex.getMessage());
+                        server.kill();
                     }
-                } else if (server.isSessionAlive()) {
-                    if(!server.isSessionCertificateDelivered(username)){
-                        server.deliverCertificate(username,this);
-                    }
-
-                    try {
-                        Object message = inputStream.readObject();
-
-                        if (message instanceof AuthenticatedMessage) {
-                            server.authenticateClient();
-                        }
-
-                        server.debug("Authenticated client " + server.getSessionAuthenticatedClients().get());
-
-                        if (server.getSessionAuthenticatedClients().get() == 2) {
-                            server.activateSession();
-                        }
-
-                    } catch (IOException | ClassNotFoundException ex) {
-                        logger.log(Level.WARNING, ex.getMessage());
-                    }
-                }
-                else{
+                } else {
                     Thread.sleep(100);
                 }
             }
         } catch (IOException | ClassNotFoundException | InterruptedException ex) {
             logger.log(Level.WARNING, ex.getMessage());
+            server.kill();
         }
+
+
     }
 
     public void write(Message message) throws IOException {
