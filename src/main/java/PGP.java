@@ -1,4 +1,4 @@
 
-public final class PGP {
+public class PGP {
 
 }
