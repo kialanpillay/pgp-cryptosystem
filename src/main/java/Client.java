@@ -2,22 +2,30 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Client {
 
-    private static final Logger logger = Logger.getLogger(Server.class.getName());
+    private static final Logger logger = Logger.getLogger(Client.class.getName());
     private static final Prettier prettier = new Prettier();
     private final String hostname;
     private final int port;
     private String username;
     private String directory;
+    private Object certificate;
+    private Object recipientCertificate;
+    private boolean certificateExchanged;
+    private boolean recipientKeyAuthenticated;
 
     public Client(String hostname, int port) {
         this.hostname = hostname;
         this.port = port;
+        //TODO
+        this.certificate = null;
+        this.recipientCertificate = null;
+        this.certificateExchanged = false;
+        this.recipientKeyAuthenticated = false;
     }
 
     public static void main(String[] args) {
@@ -57,8 +65,6 @@ public class Client {
             new MessageDispatchHandler(socket, this).start();
             new MessageRetrievalHandler(socket, this).start();
 
-        } catch (UnknownHostException ex) {
-            logger.log(Level.SEVERE, ex.getMessage());
         } catch (IOException ex) {
             logger.log(Level.SEVERE, ex.getMessage());
         }
@@ -79,5 +85,34 @@ public class Client {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public Object getCertificate() {
+        return certificate;
+    }
+
+    public Object getRecipientCertificate() {
+        return recipientCertificate;
+    }
+
+    public void setRecipientCertificate(Object recipientCertificate) {
+        this.recipientCertificate = recipientCertificate;
+        this.certificateExchanged = true;
+    }
+
+    public boolean isRecipientKeyAuthenticated() {
+        return recipientKeyAuthenticated;
+    }
+
+    public void setRecipientKeyAuthenticated(boolean recipientKeyAuthenticated) {
+        this.recipientKeyAuthenticated = recipientKeyAuthenticated;
+    }
+
+    public boolean isCertificateExchanged() {
+        return certificateExchanged;
+    }
+
+    public void debug(String message){
+        logger.info(message);
     }
 }

@@ -9,7 +9,7 @@ import java.util.logging.Logger;
 
 public class MessageRetrievalHandler extends Thread {
 
-    private static final Logger logger = Logger.getLogger(Server.class.getName());
+    private static final Logger logger = Logger.getLogger(MessageRetrievalHandler.class.getName());
     private final Socket socket;
     private final Client client;
     private ObjectInputStream inputStream;
@@ -25,8 +25,17 @@ public class MessageRetrievalHandler extends Thread {
     }
 
     public void run() {
+        //TODO: X.509 Certificate Decryption
+        try {
+            Object certificate = inputStream.readObject().toString();
+            client.setRecipientCertificate(certificate);
+            System.out.println(certificate);
+        } catch (IOException | ClassNotFoundException ex) {
+            logger.log(Level.WARNING, ex.getMessage());
+        }
         while (true) {
             try {
+                //TODO: PGP Decryption
                 Message message = (Message) inputStream.readObject();
                 byte[] data = Base64.getDecoder().decode(message.getBase64Image());
                 try (OutputStream stream = new FileOutputStream(client.getDirectory())) {
