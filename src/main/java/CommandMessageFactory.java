@@ -9,7 +9,7 @@ public class CommandMessageFactory {
         }
 
         else if(type.equalsIgnoreCase("AUTH")){
-            return new AuthenticatedMessage(message);
+            return new AuthenticateMessage(message);
         }
 
         return null;
