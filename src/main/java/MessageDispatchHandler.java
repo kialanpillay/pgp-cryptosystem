@@ -58,7 +58,7 @@ public class MessageDispatchHandler extends Thread {
 
         //TODO: Certificate Verification
 
-        while(!client.isRecipientKeyAuthenticated() || !client.isCertificateExchanged()){
+        while (!client.isOtherKeyAuthenticated() || !client.isCertificateExchanged()) {
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException ex) {

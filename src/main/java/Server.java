@@ -126,15 +126,11 @@ public class Server {
     public void initiateSession() {
         session.setAlive(true);
         logger.info("Session initiated");
-        logger.info("Session isActive: " + session.isActive());
-        logger.info("Session isAlive: " + session.isAlive());
     }
 
     public void activateSession() {
         session.setActive(true);
         logger.info("Session activated");
-        logger.info("Session isActive: " + session.isActive());
-        logger.info("Session isAlive: " + session.isAlive());
     }
 
     public void terminateSession() {
@@ -143,11 +139,7 @@ public class Server {
         logger.info("Session terminated");
     }
 
-    public void kill(){
+    public void kill() {
         System.exit(0);
-    }
-
-    public void debug(String message){
-        logger.info(message);
     }
 }

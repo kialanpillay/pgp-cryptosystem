@@ -29,7 +29,7 @@ public class MessageRetrievalHandler extends Thread {
         //TODO: X.509 Certificate Decryption
         try {
             Object certificate = inputStream.readObject().toString();
-            client.setRecipientCertificate(certificate);
+            client.setOtherCertificate(certificate);
             System.out.println(certificate);
         } catch (IOException | ClassNotFoundException ex) {
             logger.log(Level.WARNING, ex.getMessage());
