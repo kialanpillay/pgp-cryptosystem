@@ -87,7 +87,7 @@ public class Session {
         return log.get(username);
     }
 
-    public void resetDispatchedCertificates() {
+    public void resetLog() {
         for (String k : log.keySet()) {
             log.replace(k, false);
         }
@@ -98,7 +98,7 @@ public class Session {
         if (disconnect) {
             certificates.remove(username);
             log.remove(username);
-            resetDispatchedCertificates();
+            resetLog();
         }
         return disconnect;
     }
