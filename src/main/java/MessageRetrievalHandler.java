@@ -4,6 +4,7 @@ import java.io.ObjectInputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Base64;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -36,16 +37,28 @@ public class MessageRetrievalHandler extends Thread {
         while (true) {
             try {
                 //TODO: PGP Decryption
-                Message message = (Message) inputStream.readObject();
-                byte[] data = Base64.getDecoder().decode(message.getBase64Image());
-                try (OutputStream stream = new FileOutputStream(client.getDirectory())) {
-                    stream.write(data);
-                } catch (IOException ex) {
-                    logger.log(Level.WARNING, ex.getMessage());
+                Object message = inputStream.readObject();
+
+                if (message instanceof Message) {
+                    Message m = (Message) message;
+                    byte[] data = Base64.getDecoder().decode(m.getBase64Image());
+
+                    StringBuilder stringBuilder = new StringBuilder(client.getPath());
+                    try (OutputStream stream = new FileOutputStream(stringBuilder.
+                            append(ThreadLocalRandom.current().nextInt()).
+                            append(".png").toString())) {
+                        stream.write(data);
+                    } catch (IOException ex) {
+                        logger.log(Level.WARNING, ex.getMessage());
+                    }
+                    System.out.println(m.getCaption());
                 }
-                System.out.println(message.getCaption());
+
+                if (message instanceof String) {
+                    System.out.println(message);
+                }
+
             } catch (IOException | ClassNotFoundException ex) {
-                logger.log(Level.WARNING, ex.getMessage());
                 break;
             }
         }

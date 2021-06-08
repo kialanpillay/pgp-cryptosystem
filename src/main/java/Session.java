@@ -7,9 +7,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Session {
 
     private final AtomicInteger authenticatedClients;
-    private boolean alive;
-    private boolean active;
-    private boolean authenticated;
+    private volatile boolean alive;
+    private volatile boolean active;
+    private volatile boolean authenticated;
     private final Set<String> usernames = new HashSet<>();
     private final Map<String, Object> certificates = new HashMap<>();
     private final Map<String, Boolean> dispatchedCertificates = new HashMap<>();
@@ -87,12 +87,18 @@ public class Session {
         return dispatchedCertificates.get(username);
     }
 
+    public void resetDispatchedCertificates(){
+        for (String k: dispatchedCertificates.keySet()) {
+            dispatchedCertificates.replace(k, false);
+        }
+    }
+
     public boolean disconnectClient(String username) {
-        usernames.remove(username);
         boolean disconnect = usernames.remove(username);
         if (disconnect) {
             certificates.remove(username);
             dispatchedCertificates.remove(username);
+            resetDispatchedCertificates();
         }
         return disconnect;
     }

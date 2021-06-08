@@ -58,7 +58,7 @@ public class MessageDispatchHandler extends Thread {
 
         //TODO: Certificate Verification
 
-        while(!client.isRecipientKeyAuthenticated()){
+        while(!client.isRecipientKeyAuthenticated() || !client.isCertificateExchanged()){
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException ex) {
@@ -88,7 +88,7 @@ public class MessageDispatchHandler extends Thread {
                     Path path = Paths.get(input);
 
                     while (Files.notExists(path)) {
-                        prettier.print("System", "Invalid!");
+                        prettier.print("System", "The image cannot be located. Try again.");
                         path = Paths.get(stdin.readLine());
                     }
                     String caption = stdin.readLine();
@@ -109,11 +109,5 @@ public class MessageDispatchHandler extends Thread {
             }
 
         } while (!input.equals("quit"));
-
-        try {
-            socket.close();
-        } catch (IOException ex) {
-            logger.log(Level.WARNING, ex.getMessage());
-        }
     }
 }

@@ -12,7 +12,7 @@ public class Client {
     private final String hostname;
     private final int port;
     private String username;
-    private String directory;
+    private String path;
     private Object certificate;
     private Object recipientCertificate;
     private boolean certificateExchanged;
@@ -25,7 +25,7 @@ public class Client {
         this.certificate = null;
         this.recipientCertificate = null;
         this.certificateExchanged = false;
-        this.recipientKeyAuthenticated = false;
+        this.recipientKeyAuthenticated = true;
     }
 
     public static void main(String[] args) {
@@ -37,25 +37,26 @@ public class Client {
         Client client = new Client(hostname, port);
 
         String username = "";
-        String dir = "";
+        String path = "";
         BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
 
-        prettier.print("System", "Username? ");
+        prettier.print("System", "Welcome to CryptoSystem. I transfer your images more securely than FaceBook.");
+        prettier.print("System", "Who are you?");
         try {
             username = stdin.readLine();
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        prettier.print("System", "Directory? ");
+        prettier.print("System", "Where shall I store your images?");
         try {
-            dir = stdin.readLine();
+            path = stdin.readLine();
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         client.setUsername(username);
-        client.setDirectory(dir);
+        client.setPath(path);
         client.connect();
     }
 
@@ -71,12 +72,12 @@ public class Client {
 
     }
 
-    public String getDirectory() {
-        return directory;
+    public String getPath() {
+        return path;
     }
 
-    public void setDirectory(String path) {
-        this.directory = path;
+    public void setPath(String path) {
+        this.path = path;
     }
 
     public String getUsername() {

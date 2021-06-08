@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 public class Server {
 
     private static final Logger logger = Logger.getLogger(Server.class.getName());
+    private static final Prettier prettier = new Prettier();
     private final int port;
     private final Set<ClientHandler> handlers = new HashSet<>();
     private Session session;
@@ -56,6 +57,12 @@ public class Server {
         }
     }
 
+    public void broadcast(String message) throws IOException {
+        for (ClientHandler handler : handlers) {
+            handler.write(message);
+        }
+    }
+
     public void deliverCertificate(String username, ClientHandler source) throws IOException {
         for (ClientHandler handler : handlers) {
             if (handler != source) {
@@ -85,8 +92,13 @@ public class Server {
         boolean disconnect = session.disconnectClient(username);
         if (disconnect) {
             handlers.remove(handler);
-            terminateSession();
             logger.info("Client " + username + " has disconnected");
+            try {
+                broadcast(prettier.toString("Server", username + " has left the matrix."));
+            } catch (IOException ex) {
+                logger.log(Level.WARNING, ex.getMessage());
+            }
+            terminateSession();
         }
 
     }
@@ -129,6 +141,10 @@ public class Server {
         session.setAlive(false);
         session.setActive(false);
         logger.info("Session terminated");
+    }
+
+    public void kill(){
+        System.exit(0);
     }
 
     public void debug(String message){
