@@ -51,7 +51,6 @@ public class ClientHandler extends Thread {
 
                 } catch (IOException | ClassNotFoundException ex) {
                     logger.log(Level.WARNING, ex.getMessage());
-                    server.kill();
 
                 }
             }
@@ -81,7 +80,6 @@ public class ClientHandler extends Thread {
 
                     } catch (IOException ex) {
                         logger.log(Level.WARNING, ex.getMessage());
-                        server.kill();
                     }
                 } else {
                     Thread.sleep(100);

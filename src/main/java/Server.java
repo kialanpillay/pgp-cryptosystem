@@ -68,8 +68,7 @@ public class Server {
             if (handler != source) {
                 handler.write(session.getCertificate(username));
                 logger.info("Delivered X.509 certificate from " + username);
-                session.dispatchCertificate(username);
-                logger.info("Dispatched certificates " + session.getDispatchedCertificates());
+                session.log(username);
             }
         }
     }
@@ -120,7 +119,7 @@ public class Server {
     }
 
     public boolean isSessionCertificateDelivered(String username) {
-        return session.isDispatched(username);
+        return session.isLogged(username);
     }
 
     public void initiateSession() {
