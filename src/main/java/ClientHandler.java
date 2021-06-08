@@ -7,7 +7,7 @@ import java.util.logging.Logger;
 
 public class ClientHandler extends Thread {
 
-    private static final Logger logger = Logger.getLogger(Server.class.getName());
+    private static final Logger logger = Logger.getLogger(ClientHandler.class.getName());
     private final Socket socket;
     private final Server server;
     private ObjectOutputStream outputStream;
@@ -22,30 +22,78 @@ public class ClientHandler extends Thread {
             ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream());
             outputStream = new ObjectOutputStream(socket.getOutputStream());
 
-            Message message;
-            do {
-                try {
-                    message = (Message) inputStream.readObject();
-                } catch (IOException | ClassNotFoundException ex) {
-                    logger.log(Level.WARNING, ex.getMessage());
-                    break;
+            String username = inputStream.readObject().toString();
+            server.storeUsername(username);
+
+            //TODO
+            Object certificate;
+            certificate = inputStream.readObject().toString();
+            server.storeCertificate(certificate, username);
+
+            while (true) {
+
+                if (server.isSessionActive()) {
+                    try {
+
+                        Object message = null;
+                        do {
+                            try {
+                                message = inputStream.readObject();
+                            } catch (IOException | ClassNotFoundException ex) {
+                                logger.log(Level.WARNING, ex.getMessage());
+                            }
+
+                            if (message instanceof Message) {
+                                Message m = (Message) message;
+                                server.deliver(m, this);
+                            }
+
+                        } while (message instanceof Message);
+
+                        server.terminateSession();
+                        server.disconnectClient(username, this);
+                        socket.close();
+
+                    } catch (IOException ex) {
+                        logger.log(Level.WARNING, ex.getMessage());
+                    }
+                } else if (server.isSessionAlive()) {
+                    if(!server.isSessionCertificateDelivered(username)){
+                        server.deliverCertificate(username,this);
+                    }
+
+                    try {
+                        Object message = inputStream.readObject();
+
+                        if (message instanceof AuthenticatedMessage) {
+                            server.authenticateClient();
+                        }
+
+                        server.debug("Authenticated client " + server.getSessionAuthenticatedClients().get());
+
+                        if (server.getSessionAuthenticatedClients().get() == 2) {
+                            server.activateSession();
+                        }
+
+                    } catch (IOException | ClassNotFoundException ex) {
+                        logger.log(Level.WARNING, ex.getMessage());
+                    }
                 }
-
-                if (!message.getCaption().equals("quit")) {
-                    server.deliver(message, this);
+                else{
+                    Thread.sleep(100);
                 }
-
-            } while (!message.getCaption().equals("quit"));
-
-            server.terminateHandlers();
-            socket.close();
-
-        } catch (IOException ex) {
+            }
+        } catch (IOException | ClassNotFoundException | InterruptedException ex) {
             logger.log(Level.WARNING, ex.getMessage());
         }
     }
 
-    public void sendMessage(Message message) throws IOException {
+    public void write(Message message) throws IOException {
         outputStream.writeObject(message);
+    }
+
+    //TODO
+    public void write(Object certificate) throws IOException {
+        outputStream.writeObject(certificate);
     }
 }
