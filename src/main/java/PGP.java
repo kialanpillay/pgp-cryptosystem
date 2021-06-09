@@ -12,25 +12,24 @@ import java.util.Arrays;
 import java.util.zip.*;
 
 public class PGP {
-    public static String hash(String message) throws NoSuchAlgorithmException {
-        MessageDigest digest = MessageDigest.getInstance("SHA-256");
-        byte[] encodedhash = digest.digest(
-                message.getBytes(StandardCharsets.UTF_8));
-        return new String(encodedhash);
-    }
 
-    public static String RSAEncryption(String message, Key key) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+    public static byte[] RSAEncryption(byte[] messageBytes, Key key) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
         Cipher encryptCipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
         encryptCipher.init(Cipher.ENCRYPT_MODE, key);
-        byte[] secretMessageBytes = message.getBytes(StandardCharsets.UTF_8);
-        byte[] encryptedMessageBytes = encryptCipher.doFinal(secretMessageBytes);
-        return new String(encryptedMessageBytes);
+        byte[] encryptedMessageBytes = encryptCipher.doFinal(messageBytes);
+        return encryptedMessageBytes;
     }
 
-    public static byte[] compress(String message) throws UnsupportedEncodingException, IOException {
-        byte[] input = message.getBytes("UTF-8");
+    public static byte[] RSADecryption(byte[] encryptedMessageBytes, Key key) throws InvalidKeyException, NoSuchAlgorithmException, IllegalBlockSizeException, NoSuchPaddingException, BadPaddingException {
+        Cipher decryptCipher = Cipher.getInstance("RSA");
+        decryptCipher.init(Cipher.DECRYPT_MODE, key);
+        byte[] decryptedMessageBytes = decryptCipher.doFinal(encryptedMessageBytes);
+        return decryptedMessageBytes;
+    }
+
+    public static byte[] compress(byte[] message) throws UnsupportedEncodingException, IOException {
         Deflater compressor = new Deflater();
-        compressor.setInput(input);
+        compressor.setInput(message);
         compressor.finish();
         ByteArrayOutputStream bao = new ByteArrayOutputStream();
         byte[] readBuffer = new byte[1024];
