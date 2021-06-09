@@ -9,11 +9,11 @@ import java.util.logging.Logger;
 
 public class Server {
 
-    private static final Logger logger = Logger.getLogger(Server.class.getName());
-    private static final Prettier prettier = new Prettier();
-    private final int port;
-    private final Set<ClientHandler> handlers = new HashSet<>();
-    private final CommandMessageFactory commandMessageFactory = new CommandMessageFactory();
+    private static final Logger LOGGER = Logger.getLogger(Server.class.getName());
+    private static final Prettier PRETTIER = new Prettier();
+    private int port;
+    private Set<ClientHandler> handlers = new HashSet<>();
+    private final CommandMessageFactory COMMAND_MESSAGE_FACTORY = new CommandMessageFactory();
     private Session session;
 
     public Server() {
@@ -32,19 +32,19 @@ public class Server {
     public void listen() {
         try (ServerSocket serverSocket = new ServerSocket(port)) {
 
-            logger.info("Server listening on port " + port);
+            LOGGER.info("Server listening on port " + port);
             session = new Session();
 
             while (true) {
                 Socket socket = serverSocket.accept();
-                logger.info("Created socket at port " + socket.getPort());
+                LOGGER.info("Created socket at port " + socket.getPort());
                 ClientHandler handler = new ClientHandler(socket, this);
                 handlers.add(handler);
                 handler.start();
             }
 
         } catch (IOException ex) {
-            logger.log(Level.SEVERE, ex.getMessage());
+            LOGGER.log(Level.SEVERE, ex.getMessage());
             ex.printStackTrace();
         }
     }
@@ -67,7 +67,7 @@ public class Server {
         for (ClientHandler handler : handlers) {
             if (handler != source) {
                 handler.write(session.getCertificate(username));
-                logger.info("Delivered X.509 certificate from " + username);
+                LOGGER.info("Delivered X.509 certificate from " + username);
                 session.log(username);
             }
         }
@@ -75,13 +75,13 @@ public class Server {
 
     public void storeUsername(String username) {
         session.storeUsername(username);
-        logger.info("Connected clients " + session.getUsernames());
+        LOGGER.info("Connected clients " + session.getUsernames());
     }
 
     public void storeCertificate(Object certificate, String username) {
         session.storeCertificate(certificate, username);
-        logger.info("Received X.509 certificate from " + username);
-        logger.info("Session certificates " + session.getCertificates());
+        LOGGER.info("Received X.509 certificate from " + username);
+        LOGGER.info("Session certificates " + session.getCertificates());
         if (session.getUsernames().size() == 2) {
             initiateSession();
         }
@@ -91,13 +91,13 @@ public class Server {
         boolean disconnect = session.disconnectClient(username);
         if (disconnect) {
             handlers.remove(handler);
-            logger.info("Client " + username + " has disconnected");
+            LOGGER.info("Client " + username + " has disconnected");
             try {
-                String message = prettier.toString("System", username + " has left the matrix.");
-                CommandMessage quitMessage = commandMessageFactory.getCommandMessage("QUIT", message);
+                String message = PRETTIER.toString("System", username + " has left the matrix.");
+                CommandMessage quitMessage = COMMAND_MESSAGE_FACTORY.getCommandMessage("QUIT", message);
                 deliver(quitMessage);
             } catch (IOException ex) {
-                logger.log(Level.WARNING, ex.getMessage());
+                LOGGER.log(Level.WARNING, ex.getMessage());
             }
             terminateSession();
         }
@@ -126,23 +126,23 @@ public class Server {
 
     public void initiateSession() {
         session.setAlive(true);
-        logger.info("Session initiated");
+        LOGGER.info("Session initiated");
     }
 
     public void activateSession() {
         session.setActive(true);
-        logger.info("Session activated");
+        LOGGER.info("Session activated");
     }
 
     public void terminateSession() {
         session.setAlive(false);
         session.setActive(false);
-        logger.info("Session terminated");
+        LOGGER.info("Session terminated");
         kill();
     }
 
     public void kill() {
-        logger.info("Server shutting down");
+        LOGGER.info("Server shutting down");
         System.exit(0);
     }
 }
