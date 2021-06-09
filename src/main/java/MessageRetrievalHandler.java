@@ -30,7 +30,6 @@ public class MessageRetrievalHandler extends Thread {
         try {
             Object certificate = inputStream.readObject().toString();
             client.setOtherCertificate(certificate);
-            System.out.println(certificate);
         } catch (IOException | ClassNotFoundException ex) {
             LOGGER.log(Level.WARNING, ex.getMessage());
         }

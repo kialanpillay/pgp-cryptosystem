@@ -5,6 +5,17 @@ import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * <code>ClientHandler</code> is a concrete class that extends {@link Thread}.
+ * A dedicated handler thread is spawned by the <code>Server</code> after accepting
+ * an incoming connection request. A <code>ClientHandler</code> is responsible
+ * for retrieving dispatched messages from a client and delivering
+ * messages to a client on behalf of the server. <code>ClientHandler</code> reads from an
+ * {@link ObjectInputStream} and writes to an {@link ObjectOutputStream}.
+ *
+ * @author Kialan Pillay
+ * @version %I%, %G%
+ */
 public class ClientHandler extends Thread {
 
     private static final Logger LOGGER = Logger.getLogger(ClientHandler.class.getName());
@@ -12,11 +23,27 @@ public class ClientHandler extends Thread {
     private final Server server;
     private ObjectOutputStream outputStream;
 
+    /**
+     * Class constructor specifying client socket and server instance
+     */
     public ClientHandler(Socket socket, Server server) {
         this.socket = socket;
         this.server = server;
     }
 
+    /**
+     * Retrieves the client's username and certificate from
+     * the <code>ObjectInputStream</code> and stores the certificate in
+     * the {@link Session}. The thread is paused until another client connects
+     * and the session is initiated. Once a session is alive, if the certificate is
+     * yet to be delivered, the handler sends a request to the server.
+     * Once an {@link AuthenticateMessage} is received from the client, it
+     * authenticates the client in the session.
+     * Once a session is activated, the handler continuously retrieves
+     * messages from the client and passes them to the server for delivery
+     * to the destination. If a {@link QuitMessage} is received, the client is
+     * disconnected and the socket is closed.
+     */
     public void run() {
         try {
             ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream());
@@ -92,11 +119,24 @@ public class ClientHandler extends Thread {
 
     }
 
+    /**
+     * Delivers a {@link Message} to a client by writing
+     * to the <code>OutputStream</code> attached to it's socket
+     *
+     * @param message message to deliver to recipient
+     */
     public void write(Message message) throws IOException {
         outputStream.writeObject(message);
     }
 
     //TODO
+
+    /**
+     * Delivers a {@link Message} to a client by writing
+     * to the <code>OutputStream</code> attached to it's socket
+     *
+     * @param certificate client certificate to deliver to recipient
+     */
     public void write(Object certificate) throws IOException {
         outputStream.writeObject(certificate);
     }
