@@ -32,7 +32,7 @@ public class Client {
         }
 
         try {
-            this.keyPair = keyGenerator.generate(128);
+            this.keyPair = keyGenerator.generate(1024);
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
@@ -126,5 +126,10 @@ public class Client {
 
     public void debug(String message) {
         logger.info(message);
+    }
+
+    public void kill() {
+        prettier.print("System", "You are being disconnected from CryptoSystem.");
+        System.exit(0);
     }
 }
