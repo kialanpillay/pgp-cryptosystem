@@ -1,14 +1,13 @@
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import java.security.*;
 
-public class KeyGenerator {
+public class KeyUtils {
 
     private static final String DEFAULT_ALGORITHM = "RSA";
     private static final int DEFAULT_KEY_SIZE = 2048;
 
-    private KeyGenerator() {
+    private KeyUtils() {
     }
 
     public static KeyPair generate(String algorithm, int keySize) throws NoSuchAlgorithmException {
@@ -31,4 +30,12 @@ public class KeyGenerator {
         generator.initialize(DEFAULT_KEY_SIZE, random);
         return generator.generateKeyPair();
     }
+
+    public static SecretKey generateSessionKey(int keySize) throws NoSuchAlgorithmException {
+        KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
+        keyGenerator.init(keySize);
+        return keyGenerator.generateKey();
+    }
+
+
 }

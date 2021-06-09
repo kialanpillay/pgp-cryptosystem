@@ -26,7 +26,7 @@ public class Client {
         this.port = port;
 
         try {
-            this.keyPair = KeyGenerator.generate("RSA", 1024);
+            this.keyPair = KeyUtils.generate("RSA", 1024);
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
