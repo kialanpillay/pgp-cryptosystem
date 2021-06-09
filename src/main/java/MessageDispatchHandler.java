@@ -58,15 +58,13 @@ public class MessageDispatchHandler extends Thread {
 
         //TODO: Certificate Verification
 
-        while (!client.isOtherKeyAuthenticated() || !client.isCertificateExchanged()) {
+        while (!client.isOtherKeyAuthenticated()) {
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException ex) {
                 LOGGER.log(Level.WARNING, ex.getMessage());
             }
         }
-
-        //Key Validated
 
         CommandMessage commandMessage = commandMessageFactory.getCommandMessage("AUTH", client.getUsername());
         try {
