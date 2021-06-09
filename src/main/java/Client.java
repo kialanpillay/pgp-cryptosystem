@@ -9,12 +9,11 @@ import java.util.logging.Logger;
 
 public class Client {
 
-    private static final Logger logger = Logger.getLogger(Client.class.getName());
-    private static final Prettier prettier = new Prettier();
+    private static final Logger LOGGER = Logger.getLogger(Client.class.getName());
+    private static final Prettier PRETTIER = new Prettier();
     private final String hostname;
     private final int port;
     private final Object certificate;
-    private KeyGenerator keyGenerator;
     private KeyPair keyPair;
     private String username;
     private String path;
@@ -25,14 +24,9 @@ public class Client {
     public Client(String hostname, int port) {
         this.hostname = hostname;
         this.port = port;
-        try {
-            this.keyGenerator = new KeyGenerator();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
 
         try {
-            this.keyPair = keyGenerator.generate(1024);
+            this.keyPair = KeyGenerator.generate("RSA", 1024);
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
@@ -55,15 +49,15 @@ public class Client {
         String path = "";
         BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
 
-        prettier.print("System", "Welcome to CryptoSystem. I transfer your images more securely than FaceBook.");
-        prettier.print("System", "Who are you?");
+        PRETTIER.print("System", "Welcome to CryptoSystem. I transfer your images more securely than FaceBook.");
+        PRETTIER.print("System", "Who are you?");
         try {
             username = stdin.readLine();
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        prettier.print("System", "Where shall I store your images?");
+        PRETTIER.print("System", "Where shall I store your images?");
         try {
             path = stdin.readLine();
         } catch (IOException e) {
@@ -82,7 +76,7 @@ public class Client {
             new MessageRetrievalHandler(socket, this).start();
 
         } catch (IOException ex) {
-            logger.log(Level.SEVERE, ex.getMessage());
+            LOGGER.log(Level.SEVERE, ex.getMessage());
         }
 
     }
@@ -125,11 +119,11 @@ public class Client {
     }
 
     public void debug(String message) {
-        logger.info(message);
+        LOGGER.info(message);
     }
 
     public void kill() {
-        prettier.print("System", "You are being disconnected from CryptoSystem.");
+        PRETTIER.print("System", "You are being disconnected from CryptoSystem.");
         System.exit(0);
     }
 }
