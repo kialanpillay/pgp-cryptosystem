@@ -5,4 +5,9 @@ public class AuthenticateMessage implements CommandMessage{
     public AuthenticateMessage(String message){
         this.message = message;
     }
+
+    @Override
+    public String toString() {
+        return message;
+    }
 }
