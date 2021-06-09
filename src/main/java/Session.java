@@ -12,12 +12,10 @@ public class Session {
     private final Map<String, Boolean> log = new HashMap<>();
     private volatile boolean alive;
     private volatile boolean active;
-    private volatile boolean authenticated;
 
     public Session() {
         this.alive = false;
         this.active = false;
-        this.authenticated = false;
         this.authenticatedClients = new AtomicInteger(0);
     }
 
@@ -39,14 +37,6 @@ public class Session {
 
     public void setActive(boolean active) {
         this.active = active;
-    }
-
-    public boolean isAuthenticated() {
-        return authenticated;
-    }
-
-    public void setAuthenticated(boolean authenticated) {
-        this.authenticated = authenticated;
     }
 
     public void authenticate() {

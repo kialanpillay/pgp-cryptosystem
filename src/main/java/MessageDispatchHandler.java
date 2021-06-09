@@ -9,8 +9,8 @@ import java.util.logging.Logger;
 
 public class MessageDispatchHandler extends Thread {
 
-    private static final Logger logger = Logger.getLogger(MessageDispatchHandler.class.getName());
-    private static final Prettier prettier = new Prettier();
+    private static final Logger LOGGER = Logger.getLogger(MessageDispatchHandler.class.getName());
+    private static final Prettier PRETTIER = new Prettier();
     private final Socket socket;
     private final Client client;
     private final CommandMessageFactory commandMessageFactory = new CommandMessageFactory();
@@ -22,7 +22,7 @@ public class MessageDispatchHandler extends Thread {
         try {
             outputStream = new ObjectOutputStream(socket.getOutputStream());
         } catch (IOException ex) {
-            logger.log(Level.WARNING, ex.getMessage());
+            LOGGER.log(Level.WARNING, ex.getMessage());
         }
     }
 
@@ -34,7 +34,7 @@ public class MessageDispatchHandler extends Thread {
             fileInputStream.read(bytes);
             base64Image = Base64.getEncoder().encodeToString(bytes);
         } catch (IOException ex) {
-            logger.log(Level.WARNING, ex.getMessage());
+            LOGGER.log(Level.WARNING, ex.getMessage());
         }
 
         return base64Image;
@@ -45,7 +45,7 @@ public class MessageDispatchHandler extends Thread {
         try {
             outputStream.writeObject(client.getUsername());
         } catch (IOException ex) {
-            logger.log(Level.WARNING, ex.getMessage());
+            LOGGER.log(Level.WARNING, ex.getMessage());
         }
 
         //TODO: client.getCertificate()
@@ -53,7 +53,7 @@ public class MessageDispatchHandler extends Thread {
         try {
             outputStream.writeObject(certificate);
         } catch (IOException ex) {
-            logger.log(Level.WARNING, ex.getMessage());
+            LOGGER.log(Level.WARNING, ex.getMessage());
         }
 
         //TODO: Certificate Verification
@@ -62,7 +62,7 @@ public class MessageDispatchHandler extends Thread {
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException ex) {
-                logger.log(Level.WARNING, ex.getMessage());
+                LOGGER.log(Level.WARNING, ex.getMessage());
             }
         }
 
@@ -72,7 +72,7 @@ public class MessageDispatchHandler extends Thread {
         try {
             outputStream.writeObject(commandMessage);
         } catch (IOException ex) {
-            logger.log(Level.WARNING, ex.getMessage());
+            LOGGER.log(Level.WARNING, ex.getMessage());
         }
 
         Object message = null;
@@ -88,7 +88,7 @@ public class MessageDispatchHandler extends Thread {
                     Path path = Paths.get(input);
 
                     while (Files.notExists(path)) {
-                        prettier.print("System", "The image cannot be located. Try again.");
+                        PRETTIER.print("System", "The image cannot be located. Try again.");
                         path = Paths.get(stdin.readLine());
                     }
                     String caption = stdin.readLine();
@@ -99,13 +99,13 @@ public class MessageDispatchHandler extends Thread {
                 }
 
             } catch (IOException ex) {
-                logger.log(Level.WARNING, ex.getMessage());
+                LOGGER.log(Level.WARNING, ex.getMessage());
             }
 
             try {
                 outputStream.writeObject(message);
             } catch (IOException ex) {
-                logger.log(Level.WARNING, ex.getMessage());
+                LOGGER.log(Level.WARNING, ex.getMessage());
             }
 
         } while (!input.equals("quit"));

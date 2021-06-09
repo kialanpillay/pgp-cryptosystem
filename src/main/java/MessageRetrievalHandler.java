@@ -10,7 +10,7 @@ import java.util.logging.Logger;
 
 public class MessageRetrievalHandler extends Thread {
 
-    private static final Logger logger = Logger.getLogger(MessageRetrievalHandler.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(MessageRetrievalHandler.class.getName());
     private final Socket socket;
     private final Client client;
     private ObjectInputStream inputStream;
@@ -32,7 +32,7 @@ public class MessageRetrievalHandler extends Thread {
             client.setOtherCertificate(certificate);
             System.out.println(certificate);
         } catch (IOException | ClassNotFoundException ex) {
-            logger.log(Level.WARNING, ex.getMessage());
+            LOGGER.log(Level.WARNING, ex.getMessage());
         }
         while (true) {
             try {
@@ -49,7 +49,7 @@ public class MessageRetrievalHandler extends Thread {
                             append(".png").toString())) {
                         stream.write(data);
                     } catch (IOException ex) {
-                        logger.log(Level.WARNING, ex.getMessage());
+                        LOGGER.log(Level.WARNING, ex.getMessage());
                     }
                     System.out.println(m.getCaption());
                 }

@@ -5,20 +5,30 @@ import java.security.SecureRandom;
 
 public class KeyGenerator {
 
-    private final KeyPairGenerator generator;
+    private static final String DEFAULT_ALGORITHM = "RSA";
+    private static final int DEFAULT_KEY_SIZE = 2048;
 
-    public KeyGenerator() throws NoSuchAlgorithmException {
-        generator = KeyPairGenerator.getInstance("RSA");
-
+    private KeyGenerator() {
     }
 
-    public KeyGenerator(String algorithm) throws NoSuchAlgorithmException {
-        generator = KeyPairGenerator.getInstance(algorithm);
-    }
-
-    public KeyPair generate(int keySize) throws NoSuchAlgorithmException {
+    public static KeyPair generate(String algorithm, int keySize) throws NoSuchAlgorithmException {
+        KeyPairGenerator generator = KeyPairGenerator.getInstance(algorithm);
         SecureRandom random = SecureRandom.getInstanceStrong();
         generator.initialize(keySize, random);
+        return generator.generateKeyPair();
+    }
+
+    public static KeyPair generate(String algorithm) throws NoSuchAlgorithmException {
+        KeyPairGenerator generator = KeyPairGenerator.getInstance(algorithm);
+        SecureRandom random = SecureRandom.getInstanceStrong();
+        generator.initialize(DEFAULT_KEY_SIZE, random);
+        return generator.generateKeyPair();
+    }
+
+    public static KeyPair generate() throws NoSuchAlgorithmException {
+        KeyPairGenerator generator = KeyPairGenerator.getInstance(DEFAULT_ALGORITHM);
+        SecureRandom random = SecureRandom.getInstanceStrong();
+        generator.initialize(DEFAULT_KEY_SIZE, random);
         return generator.generateKeyPair();
     }
 }
