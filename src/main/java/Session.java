@@ -9,7 +9,7 @@ public class Session {
     private final AtomicInteger authenticatedClients;
     private final Set<String> usernames = new HashSet<>();
     private final Map<String, Object> certificates = new HashMap<>();
-    private final Map<String, Boolean> dispatchedCertificates = new HashMap<>();
+    private final Map<String, Boolean> log = new HashMap<>();
     private volatile boolean alive;
     private volatile boolean active;
     private volatile boolean authenticated;
@@ -72,24 +72,24 @@ public class Session {
 
     public void storeCertificate(Object certificate, String username) {
         certificates.put(username, certificate);
-        dispatchedCertificates.put(username, false);
+        log.put(username, false);
     }
 
-    public Map<String, Boolean> getDispatchedCertificates() {
-        return dispatchedCertificates;
+    public Map<String, Boolean> getLog() {
+        return log;
     }
 
-    public void dispatchCertificate(String username) {
-        dispatchedCertificates.replace(username, true);
+    public void log(String username) {
+        log.replace(username, true);
     }
 
-    public boolean isDispatched(String username) {
-        return dispatchedCertificates.get(username);
+    public boolean isLogged(String username) {
+        return log.get(username);
     }
 
-    public void resetDispatchedCertificates() {
-        for (String k : dispatchedCertificates.keySet()) {
-            dispatchedCertificates.replace(k, false);
+    public void resetLog() {
+        for (String k : log.keySet()) {
+            log.replace(k, false);
         }
     }
 
@@ -97,8 +97,8 @@ public class Session {
         boolean disconnect = usernames.remove(username);
         if (disconnect) {
             certificates.remove(username);
-            dispatchedCertificates.remove(username);
-            resetDispatchedCertificates();
+            log.remove(username);
+            resetLog();
         }
         return disconnect;
     }

@@ -13,6 +13,7 @@ public class Server {
     private static final Prettier prettier = new Prettier();
     private final int port;
     private final Set<ClientHandler> handlers = new HashSet<>();
+    private final CommandMessageFactory commandMessageFactory = new CommandMessageFactory();
     private Session session;
 
     public Server() {
@@ -33,7 +34,6 @@ public class Server {
 
             logger.info("Server listening on port " + port);
             session = new Session();
-            logger.info("Session created");
 
             while (true) {
                 Socket socket = serverSocket.accept();
@@ -57,7 +57,7 @@ public class Server {
         }
     }
 
-    public void broadcast(String message) throws IOException {
+    public void deliver(CommandMessage message) throws IOException {
         for (ClientHandler handler : handlers) {
             handler.write(message);
         }
@@ -68,8 +68,7 @@ public class Server {
             if (handler != source) {
                 handler.write(session.getCertificate(username));
                 logger.info("Delivered X.509 certificate from " + username);
-                session.dispatchCertificate(username);
-                logger.info("Dispatched certificates " + session.getDispatchedCertificates());
+                session.log(username);
             }
         }
     }
@@ -94,7 +93,9 @@ public class Server {
             handlers.remove(handler);
             logger.info("Client " + username + " has disconnected");
             try {
-                broadcast(prettier.toString("Server", username + " has left the matrix."));
+                String message = prettier.toString("System", username + " has left the matrix.");
+                CommandMessage quitMessage = commandMessageFactory.getCommandMessage("QUIT", message);
+                deliver(quitMessage);
             } catch (IOException ex) {
                 logger.log(Level.WARNING, ex.getMessage());
             }
@@ -120,7 +121,7 @@ public class Server {
     }
 
     public boolean isSessionCertificateDelivered(String username) {
-        return session.isDispatched(username);
+        return session.isLogged(username);
     }
 
     public void initiateSession() {
@@ -137,9 +138,11 @@ public class Server {
         session.setAlive(false);
         session.setActive(false);
         logger.info("Session terminated");
+        kill();
     }
 
     public void kill() {
+        logger.info("Server shutting down");
         System.exit(0);
     }
 }
