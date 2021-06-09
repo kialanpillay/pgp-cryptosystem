@@ -7,6 +7,11 @@ import java.util.zip.*;
 
 public class PGP {
 
+    public static byte [] hash(String message) throws NoSuchAlgorithmException {
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        return digest.digest(message.getBytes());
+    }
+
     public static byte[] RSAEncryption(byte[] messageBytes, Key key) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
         Cipher encryptCipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
         encryptCipher.init(Cipher.ENCRYPT_MODE, key);
@@ -74,4 +79,30 @@ public class PGP {
         return bao.toByteArray();
     }
 
+    // Untested
+    public static byte[] PGPEncode (Message message, PrivateKey senderKey, PublicKey receiverKey, SecretKey sessionKey, IvParameterSpec iv) throws NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException, InvalidAlgorithmParameterException {
+        String messageConcat = message.toString();
+        byte [] messageBytes = messageConcat.getBytes();
+        byte [] signatureBytes = RSAEncryption(hash(messageConcat),senderKey);
+        byte [] signedMessage = concatBytes(signatureBytes, messageBytes); // Signature first, then message
+        byte [] compressedSignedMessage = compress(signedMessage);
+        byte [] encryptedSignedMessage = AESEncryption(compressedSignedMessage, sessionKey, iv);
+        byte [] concatSessionData = concatBytes(iv.getIV(), sessionKey.getEncoded());
+        byte [] encryptedSessionData = RSAEncryption(concatSessionData, receiverKey);
+        byte [] pgpMessage = concatBytes(encryptedSessionData, encryptedSignedMessage);
+        return pgpMessage;
+    }
+
+    /* TODO
+    public static byte[] PGPDecode (byte [] pgpMessage, PrivateKey receiverKey, PublicKey senderKey){
+        return "".getBytes();
+    }
+    */
+
+    private static byte[] concatBytes (byte [] prefBytes, byte [] suffBytes){
+        byte[] result = new byte[prefBytes.length + suffBytes.length];
+        System.arraycopy(prefBytes, 0, result, 0, prefBytes.length);
+        System.arraycopy(suffBytes, 0, result, prefBytes.length, suffBytes.length);
+        return result;
+    }
 }
