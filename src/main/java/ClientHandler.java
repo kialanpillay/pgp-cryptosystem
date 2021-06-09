@@ -7,7 +7,7 @@ import java.util.logging.Logger;
 
 public class ClientHandler extends Thread {
 
-    private static final Logger logger = Logger.getLogger(ClientHandler.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(ClientHandler.class.getName());
     private final Socket socket;
     private final Server server;
     private ObjectOutputStream outputStream;
@@ -64,7 +64,7 @@ public class ClientHandler extends Thread {
                             try {
                                 message = inputStream.readObject();
                             } catch (IOException | ClassNotFoundException ex) {
-                                logger.log(Level.WARNING, ex.getMessage());
+                                LOGGER.log(Level.WARNING, ex.getMessage());
                             }
                             if (message instanceof Message) {
                                 Message m = (Message) message;
@@ -85,7 +85,7 @@ public class ClientHandler extends Thread {
                 }
             }
         } catch (IOException | ClassNotFoundException | InterruptedException ex) {
-            logger.log(Level.WARNING, ex.getMessage());
+            LOGGER.log(Level.WARNING, ex.getMessage());
             server.kill();
         }
 
