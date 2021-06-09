@@ -54,12 +54,13 @@ public class MessageRetrievalHandler extends Thread {
                     System.out.println(m.getCaption());
                 }
 
-                if (message instanceof String) {
-                    System.out.println(message);
+                if (message instanceof QuitMessage) {
+                    QuitMessage m = (QuitMessage)message;
+                    System.out.println(m);
                 }
 
             } catch (IOException | ClassNotFoundException ex) {
-                break;
+                client.kill();
             }
         }
     }
