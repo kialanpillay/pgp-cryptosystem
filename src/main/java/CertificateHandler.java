@@ -33,8 +33,7 @@ public class CertificateHandler extends Thread {
     public void run() {
         try {
             X509Certificate certificate = (X509Certificate) inputStream.readObject();
-            client.setOtherCertificate(certificate);
-            client.verifyOtherCertificate();
+            client.storeOtherCertificate(certificate);
         } catch (IOException | ClassNotFoundException ex) {
             LOGGER.log(Level.WARNING, ex.getMessage());
         }

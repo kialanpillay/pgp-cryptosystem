@@ -1,3 +1,8 @@
+import java.io.IOException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -37,16 +42,34 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Session {
 
     private final AtomicInteger authenticatedClients;
-    private final Set<String> usernames = new HashSet<>();
-    private final Map<String, X509Certificate> certificates = new HashMap<>();
+    private final Set<String> aliases = new HashSet<>();
     private final Map<String, Boolean> log = new HashMap<>();
+    private KeyStore keyStore;
     private volatile boolean alive;
     private volatile boolean active;
 
-    public Session() {
+    public Session() throws KeyStoreException {
         this.alive = false;
         this.active = false;
         this.authenticatedClients = new AtomicInteger(0);
+        loadKeyStore();
+    }
+
+    /**
+     * Initialises a PKCS12 keystore for in-memory storage
+     * of trusted certificates
+     */
+    private void loadKeyStore() {
+        try {
+            this.keyStore = KeyStore.getInstance("PKCS12");
+        } catch (KeyStoreException e) {
+            e.printStackTrace();
+        }
+        try {
+            this.keyStore.load(null, null);
+        } catch (IOException | NoSuchAlgorithmException | CertificateException e) {
+            e.printStackTrace();
+        }
     }
 
     public boolean isAlive() {
@@ -87,64 +110,59 @@ public class Session {
         this.authenticatedClients.getAndIncrement();
     }
 
-    public Map<String, X509Certificate> getCertificates() {
-        return certificates;
-    }
-
-    //TODO
-
     /**
      * Returns the stored certificate for a specified client
      *
-     * @return <code>Object</code>
+     * @return <code>X509Certificate</code>
+     * @throws {@link KeyStoreException}
      */
-    public Object getCertificate(String username) {
-        return certificates.get(username);
+    public X509Certificate getCertificate(String alias) throws KeyStoreException {
+        return (X509Certificate) keyStore.getCertificate(alias);
     }
 
-    public Set<String> getUsernames() {
-        return usernames;
+    public Set<String> getAliases() {
+        return aliases;
     }
 
-    public void storeUsername(String username) {
-        usernames.add(username);
+    public void storeAlias(String alias) {
+        aliases.add(alias);
     }
 
     /**
-     * Stores a client certificate in internal state
+     * Stores a client certificate as an entry of an in-memory {@link KeyStore}
      * and adds a log entry to track certificate delivery
      *
      * @param certificate signed certificate containing client public key
-     * @param username    client username
+     * @param alias       client alias
      */
-    public void storeCertificate(X509Certificate certificate, String username) {
-        certificates.put(username, certificate);
-        log.put(username, false);
-    }
-
-    public Map<String, Boolean> getLog() {
-        return log;
+    public void storeCertificate(X509Certificate certificate, String alias){
+        try {
+            keyStore.setCertificateEntry(alias, certificate);
+        } catch (KeyStoreException e) {
+            e.printStackTrace();
+        }
+        log.put(alias, false);
     }
 
     /**
      * Updates the session log to record successful delivery
      * of a certificate
      *
-     * @param username username of client attached to the certificate
+     * @param alias alias of client attached to the certificate
      */
-    public void log(String username) {
-        log.replace(username, true);
+    public void log(String alias) {
+        log.replace(alias, true);
     }
 
     /**
      * Returns the certificate delivery record for a specified client
      *
-     * @param username username of client to poll
+     * @param alias alias of client to poll
      * @return <code>boolean</code> returns <code>True</code> if certificate is delivered
      * <code>False</code> otherwise
      */
-    public boolean isLogged(String username) {
-        return log.get(username);
+    public boolean isLogged(String alias) {
+        return log.get(alias);
     }
 
     public void resetLog() {
@@ -156,15 +174,19 @@ public class Session {
     /**
      * Removes a client and associated from internal state
      *
-     * @param username username of client to disconnect
+     * @param alias alias of client to disconnect
      * @return <code>boolean</code> returns <code>True</code> if client is successfully disconnected
      * <code>False</code> otherwise
      */
-    public boolean disconnectClient(String username) {
-        boolean disconnect = usernames.remove(username);
+    public boolean disconnectClient(String alias){
+        boolean disconnect = aliases.remove(alias);
         if (disconnect) {
-            certificates.remove(username);
-            log.remove(username);
+            try {
+                keyStore.deleteEntry(alias);
+            } catch (KeyStoreException e) {
+                e.printStackTrace();
+            }
+            log.remove(alias);
             resetLog();
         }
         return disconnect;

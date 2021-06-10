@@ -14,7 +14,7 @@ public class MessageDispatchHandler extends Thread {
     private final Socket socket;
     private final Client client;
     private final CommandMessageFactory commandMessageFactory = new CommandMessageFactory();
-    private ObjectOutputStream outputStream;
+    private final ObjectOutputStream outputStream;
 
     public MessageDispatchHandler(Socket socket, ObjectOutputStream outputStream, Client client) {
         this.socket = socket;
@@ -44,16 +44,19 @@ public class MessageDispatchHandler extends Thread {
                 LOGGER.log(Level.WARNING, ex.getMessage());
             }
         }
+        PRETTIER.print("System", "The identity of the other party has been authenticated.");
+        PRETTIER.print("System", "The secure session will be activated shortly.");
 
         Object message = null;
         String input = "";
         do {
             BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
             try {
+                PRETTIER.print("System", "Enter the absolute path of an image to send.");
                 input = stdin.readLine();
 
                 if (input.equals("quit")) {
-                    message = commandMessageFactory.getCommandMessage("QUIT", client.getUsername());
+                    message = commandMessageFactory.getCommandMessage("QUIT", client.getAlias());
                 } else {
                     Path path = Paths.get(input);
 
@@ -61,6 +64,7 @@ public class MessageDispatchHandler extends Thread {
                         PRETTIER.print("System", "The image cannot be located. Try again.");
                         path = Paths.get(stdin.readLine());
                     }
+                    PRETTIER.print("System", "Enter a caption for the image. ");
                     String caption = stdin.readLine();
                     File file = path.toFile();
 

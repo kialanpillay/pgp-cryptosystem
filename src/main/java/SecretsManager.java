@@ -22,8 +22,8 @@ public class SecretsManager {
         return CAKeyPair.getPublic();
     }
 
-    public X509Certificate generateCertificate(String username, PublicKey publicKey) {
-        return CertificateGenerator.generate(username, publicKey, CAKeyPair.getPrivate());
+    public X509Certificate generateCertificate(String alias, PublicKey publicKey) {
+        return CertificateGenerator.generate(alias, publicKey, CAKeyPair.getPrivate());
     }
 
     private KeyPair load(String filename, char[] password)

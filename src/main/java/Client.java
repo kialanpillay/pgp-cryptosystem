@@ -1,5 +1,7 @@
 import java.io.*;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -30,10 +32,9 @@ public class Client {
     private final int port;
     private final PublicKey CAPublicKey;
     private final KeyPair keyPair;
-    private X509Certificate certificate;
-    private X509Certificate otherCertificate;
+    private KeyStore keyStore;
     private boolean otherKeyAuthenticated;
-    private String username;
+    private String alias;
     private String path;
 
     /**
@@ -44,15 +45,31 @@ public class Client {
         this.port = port;
         this.CAPublicKey = SECRETS_MANAGER.getPublicKey();
         this.keyPair = KeyUtils.generate("RSA", 1024);
-        this.certificate = null;
-        this.otherCertificate = null;
         this.otherKeyAuthenticated = false;
+        loadKeyStore();
+    }
+
+    /**
+     * Initialises a PKCS12 keystore for in-memory storage
+     * of secrets
+     */
+    private void loadKeyStore() {
+        try {
+            this.keyStore = KeyStore.getInstance("PKCS12");
+        } catch (KeyStoreException e) {
+            e.printStackTrace();
+        }
+        try {
+            this.keyStore.load(null, null);
+        } catch (IOException | NoSuchAlgorithmException | CertificateException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
      * Starts a client instance using the specified hostname and port.
      * If no hostname or port is specified the operation is aborted.
-     * Retrieves the client's username and output directory from the console
+     * Retrieves the client's alias and output directory from the console
      * and initiates a connection request to the server.
      *
      * @param args command line parameters
@@ -70,26 +87,32 @@ public class Client {
 
         Client client = new Client(hostname, port);
 
-        String username = "";
+        String alias = "";
         String path = "";
         BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
 
-        PRETTIER.print("System", "Welcome to CryptoSystem. I transfer your images more securely than FaceBook.");
-        PRETTIER.print("System", "Who are you?");
+        PRETTIER.print("System", "Welcome to CryptoSystem. Safe. Secure. Communication.");
+        PRETTIER.print("System", "Alias?");
         try {
-            username = stdin.readLine();
+            alias = stdin.readLine();
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        PRETTIER.print("System", "Where shall I store your images?");
+        PRETTIER.print("System", "Directory?");
         try {
             path = stdin.readLine();
+            while (!Files.isDirectory(Paths.get(path))) {
+                PRETTIER.print("System", "This is not a valid directory. Try again.");
+                path = stdin.readLine();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        client.setUsername(username);
+        PRETTIER.print("System", "Please wait until a secure session is established.");
+
+        client.setAlias(alias);
         client.setPath(path);
         client.getCASignedCertificate();
         client.connect();
@@ -97,10 +120,16 @@ public class Client {
 
     /**
      * Generates a certificate containing the public key of the client
-     * signed using the private key of the Certificate Authority
+     * signed using the private key of the Certificate Authority.
+     * Stores the certificate in an in-memory key store.
      */
     private void getCASignedCertificate() {
-        this.certificate = SECRETS_MANAGER.generateCertificate(this.username, this.keyPair.getPublic());
+        X509Certificate certificate = SECRETS_MANAGER.generateCertificate(this.alias, this.keyPair.getPublic());
+        try {
+            keyStore.setCertificateEntry(alias, certificate);
+        } catch (KeyStoreException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -134,33 +163,46 @@ public class Client {
         this.path = path;
     }
 
-    public String getUsername() {
-        return this.username;
+    public String getAlias() {
+        return this.alias;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setAlias(String alias) {
+        this.alias = alias;
     }
 
-    public X509Certificate getCertificate() {
-        return certificate;
+    public X509Certificate getCertificate() throws KeyStoreException {
+        return (X509Certificate) keyStore.getCertificate(alias);
     }
 
-    public X509Certificate getOtherCertificate() {
-        return otherCertificate;
+    /**
+     * Stores a certificate from a connected client
+     * in the in-memory key store and initiates verification.
+     *
+     * @param otherCertificate signed certificate of other client
+     */
+    public void storeOtherCertificate(X509Certificate otherCertificate) {
+        try {
+            keyStore.setCertificateEntry("other", otherCertificate);
+        } catch (KeyStoreException e) {
+            e.printStackTrace();
+        }
+        verifyOtherCertificate();
     }
 
-    public void setOtherCertificate(X509Certificate otherCertificate) {
-        this.otherCertificate = otherCertificate;
-    }
-
+    /**
+     * Verifies the authenticity of a client using it's certificate.
+     * The certificate is verified using the public key
+     * of the trusted Certificate Authority.
+     * If the certificate is unverified a <code>InvalidKeyException</code>
+     * is thrown.
+     */
     public void verifyOtherCertificate() {
         try {
-            this.otherCertificate.verify(CAPublicKey);
-            System.out.println(this.otherCertificate.getPublicKey());
+            this.keyStore.getCertificate("other").verify(CAPublicKey);
             this.otherKeyAuthenticated = true;
 
-        } catch (CertificateException | NoSuchAlgorithmException | InvalidKeyException | NoSuchProviderException | SignatureException e) {
+        } catch (CertificateException | NoSuchAlgorithmException | InvalidKeyException | NoSuchProviderException | SignatureException | KeyStoreException e) {
             e.printStackTrace();
             this.otherKeyAuthenticated = false;
         }

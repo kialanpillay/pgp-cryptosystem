@@ -51,22 +51,21 @@ public class CertificateAuthority {
     private static void store(
             String filename, char[] password,
             KeyPair generatedKeyPair) throws KeyStoreException, IOException,
-            NoSuchAlgorithmException, CertificateException,
-            OperatorCreationException {
+            NoSuchAlgorithmException, CertificateException {
 
         X509Certificate rootCertificate = generateSelfSignedCertificate(generatedKeyPair);
 
-        KeyStore pkcs12KeyStore = KeyStore.getInstance("PKCS12");
-        pkcs12KeyStore.load(null, null);
+        KeyStore keyStore = KeyStore.getInstance("PKCS12");
+        keyStore.load(null, null);
 
         KeyStore.Entry entry = new KeyStore.PrivateKeyEntry(generatedKeyPair.getPrivate(),
                 new X509Certificate[]{rootCertificate});
         KeyStore.ProtectionParameter param = new KeyStore.PasswordProtection(password);
 
-        pkcs12KeyStore.setEntry("CA", entry, param);
+        keyStore.setEntry("CA", entry, param);
 
         try (FileOutputStream fileOutputStream = new FileOutputStream(filename)) {
-            pkcs12KeyStore.store(fileOutputStream, password);
+            keyStore.store(fileOutputStream, password);
         }
     }
 

@@ -1,6 +1,7 @@
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.security.KeyStoreException;
 import java.security.cert.X509Certificate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -9,7 +10,7 @@ import java.util.logging.Logger;
  * <code>AuthenticationHandler</code> is a concrete class that extends {@link Thread}.
  * A dedicated handler thread is spawned by the <code>Client</code> after accepting
  * an initiating a connection request. A <code>AuthenticationHandler</code> is responsible
- * for sending the username and certificate of the client to the server. Once the certificates
+ * for sending the alias and certificate of the client to the server. Once the certificates
  * have been exchanged and verified, the handler dispatches a {@link AuthenticateMessage}
  * to the <code>Server</code>. Once both clients have authenticated, the session is activated.
  *
@@ -37,12 +38,17 @@ public class AuthenticationHandler extends Thread {
     public void run() {
 
         try {
-            outputStream.writeObject(client.getUsername());
+            outputStream.writeObject(client.getAlias());
         } catch (IOException ex) {
             LOGGER.log(Level.WARNING, ex.getMessage());
         }
 
-        X509Certificate certificate = client.getCertificate();
+        X509Certificate certificate = null;
+        try {
+            certificate = client.getCertificate();
+        } catch (KeyStoreException ex) {
+            LOGGER.log(Level.WARNING, ex.getMessage());
+        }
         try {
             outputStream.writeObject(certificate);
         } catch (IOException ex) {
@@ -57,7 +63,7 @@ public class AuthenticationHandler extends Thread {
             }
         }
 
-        CommandMessage commandMessage = commandMessageFactory.getCommandMessage("AUTH", client.getUsername());
+        CommandMessage commandMessage = commandMessageFactory.getCommandMessage("AUTH", client.getAlias());
         try {
             outputStream.writeObject(commandMessage);
         } catch (IOException ex) {

@@ -2,6 +2,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.security.KeyStoreException;
 import java.security.cert.X509Certificate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -36,7 +37,7 @@ public class ClientHandler extends Thread {
     }
 
     /**
-     * Retrieves the client's username and certificate from
+     * Retrieves the client's alias and certificate from
      * the <code>ObjectInputStream</code> and stores the certificate in
      * the {@link Session}. The thread is paused until another client connects
      * and the session is initiated. Once a session is alive, if the certificate is
@@ -53,20 +54,20 @@ public class ClientHandler extends Thread {
             ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream());
             outputStream = new ObjectOutputStream(socket.getOutputStream());
 
-            String username = inputStream.readObject().toString();
-            server.storeUsername(username);
+            String alias = inputStream.readObject().toString();
+            server.storeAlias(alias);
 
             X509Certificate certificate;
             certificate = (X509Certificate)inputStream.readObject();
-            server.storeCertificate(certificate, username);
+            server.storeCertificate(certificate, alias);
 
             while (!server.isSessionAlive()) {
                 Thread.sleep(100);
             }
 
             if (server.isSessionAlive()) {
-                if (!server.isSessionCertificateDelivered(username)) {
-                    server.deliverCertificate(username, this);
+                if (!server.isSessionCertificateDelivered(alias)) {
+                    server.deliverCertificate(alias, this);
                 }
                 try {
                     Object message = inputStream.readObject();
@@ -80,7 +81,7 @@ public class ClientHandler extends Thread {
                     }
 
                 } catch (IOException | ClassNotFoundException ex) {
-                    // server.kill();
+                    server.kill();
                 }
             }
 
@@ -104,17 +105,17 @@ public class ClientHandler extends Thread {
                         } while (message instanceof Message);
 
 
-                        server.disconnectClient(username, this);
+                        server.disconnectClient(alias, this);
                         socket.close();
 
                     } catch (IOException ex) {
-                        // server.kill();
+                        server.kill();
                     }
                 } else {
                     Thread.sleep(100);
                 }
             }
-        } catch (IOException | ClassNotFoundException | InterruptedException ex) {
+        } catch (IOException | ClassNotFoundException | InterruptedException | KeyStoreException ex) {
             LOGGER.log(Level.WARNING, ex.getMessage());
             server.kill();
         }
