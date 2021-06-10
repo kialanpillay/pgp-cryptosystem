@@ -1,14 +1,16 @@
-import javax.crypto.SecretKey;
-import javax.crypto.spec.IvParameterSpec;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
+import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
+
 /**
- * <code>KeyUtils</code> is a concrete wrapper class that generates
- * key-pairs using the {@link java.security.KeyPairGenerator} and
- * keys using the {@link javax.crypto.KeyGenerator}
+ * <code>KeyUtils</code> is a concrete wrapper class that generates key-pairs
+ * using the {@link java.security.KeyPairGenerator}, keys using the
+ * {@link javax.crypto.KeyGenerator} and initialization vectors using the
+ * {@link javax.crypto.spec.IvParameterSpec}.
  *
  * @author Kialan Pillay
  * @version %I%, %G%
@@ -25,51 +27,62 @@ public class KeyUtils {
     }
 
     /**
-     * Generates a key-pair of the specified size using a cryptographic algorithm
+     * Generates a key-pair of the specified size using a cryptographic algorithm.
      *
      * @param algorithm algorithm to generate the key-pair
      * @param keySize   bit-size of the generated key
      * @return <code>KeyPair</code>
      */
-    public static KeyPair generate(String algorithm, int keySize) throws NoSuchAlgorithmException {
-        KeyPairGenerator generator = KeyPairGenerator.getInstance(algorithm);
-        SecureRandom random = SecureRandom.getInstanceStrong();
+    public static KeyPair generate(final String algorithm, final int keySize) throws NoSuchAlgorithmException {
+        final KeyPairGenerator generator = KeyPairGenerator.getInstance(algorithm);
+        final SecureRandom random = SecureRandom.getInstanceStrong();
         generator.initialize(keySize, random);
         return generator.generateKeyPair();
     }
 
     /**
-     * Generates a 2048-bit key-pair using the specified cryptographic algorithm
+     * Generates a 2048-bit key-pair using the specified cryptographic algorithm.
      *
      * @param algorithm algorithm to generate the key-pair
      * @return <code>KeyPair</code>
      */
-    public static KeyPair generate(String algorithm) throws NoSuchAlgorithmException {
-        KeyPairGenerator generator = KeyPairGenerator.getInstance(algorithm);
-        SecureRandom random = SecureRandom.getInstanceStrong();
+    public static KeyPair generate(final String algorithm) throws NoSuchAlgorithmException {
+        final KeyPairGenerator generator = KeyPairGenerator.getInstance(algorithm);
+        final SecureRandom random = SecureRandom.getInstanceStrong();
         generator.initialize(DEFAULT_KEY_SIZE, random);
         return generator.generateKeyPair();
     }
 
     /**
-     * Generates a 2048-bit key-pair using the RSA algorithm
+     * Generates a 2048-bit key-pair using the RSA algorithm.
      *
      * @return <code>KeyPair</code>
      */
     public static KeyPair generate() throws NoSuchAlgorithmException {
-        KeyPairGenerator generator = KeyPairGenerator.getInstance(DEFAULT_ALGORITHM);
-        SecureRandom random = SecureRandom.getInstanceStrong();
+        final KeyPairGenerator generator = KeyPairGenerator.getInstance(DEFAULT_ALGORITHM);
+        final SecureRandom random = SecureRandom.getInstanceStrong();
         generator.initialize(DEFAULT_KEY_SIZE, random);
         return generator.generateKeyPair();
     }
+
+    /**
+     * Generates a 128-bit AES session key.
+     *
+     * @return <code>SecretKey</code>
+     */
     public static SecretKey generateSessionKey() throws NoSuchAlgorithmException {
-        javax.crypto.KeyGenerator keyGenerator = javax.crypto.KeyGenerator.getInstance("AES");
+        final javax.crypto.KeyGenerator keyGenerator = javax.crypto.KeyGenerator.getInstance("AES");
         keyGenerator.init(128);
         return keyGenerator.generateKey();
     }
 
+    /**
+     * Generates a 128-bit initialisation vector.
+     *
+     * @return <code>IvParameterSpec</code>
+     */
     public static IvParameterSpec generateIV() {
-        byte[] initializationVector = new byte[16];
+        final byte[] initializationVector = new byte[16];
         new SecureRandom().nextBytes(initializationVector);
         return new IvParameterSpec(initializationVector);
     }
