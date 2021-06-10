@@ -54,7 +54,7 @@ public class MessageRetrievalHandler extends Thread {
 
                 if (message instanceof QuitMessage) {
                     QuitMessage m = (QuitMessage)message;
-                    System.out.println(m);
+                    PRETTIER.print("System", m.getMessage());
                 }
 
             } catch (IOException | ClassNotFoundException ex) {

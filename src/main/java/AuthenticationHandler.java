@@ -1,6 +1,7 @@
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.security.KeyStoreException;
 import java.security.cert.X509Certificate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -42,7 +43,12 @@ public class AuthenticationHandler extends Thread {
             LOGGER.log(Level.WARNING, ex.getMessage());
         }
 
-        X509Certificate certificate = client.getCertificate();
+        X509Certificate certificate = null;
+        try {
+            certificate = client.getCertificate();
+        } catch (KeyStoreException ex) {
+            LOGGER.log(Level.WARNING, ex.getMessage());
+        }
         try {
             outputStream.writeObject(certificate);
         } catch (IOException ex) {

@@ -2,6 +2,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.security.KeyStoreException;
 import java.security.cert.X509Certificate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -114,7 +115,7 @@ public class ClientHandler extends Thread {
                     Thread.sleep(100);
                 }
             }
-        } catch (IOException | ClassNotFoundException | InterruptedException ex) {
+        } catch (IOException | ClassNotFoundException | InterruptedException | KeyStoreException ex) {
             LOGGER.log(Level.WARNING, ex.getMessage());
             server.kill();
         }

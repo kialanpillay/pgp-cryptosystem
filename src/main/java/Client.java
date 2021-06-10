@@ -32,8 +32,7 @@ public class Client {
     private final int port;
     private final PublicKey CAPublicKey;
     private final KeyPair keyPair;
-    private X509Certificate certificate;
-    private X509Certificate otherCertificate;
+    private KeyStore keyStore;
     private boolean otherKeyAuthenticated;
     private String alias;
     private String path;
@@ -46,9 +45,25 @@ public class Client {
         this.port = port;
         this.CAPublicKey = SECRETS_MANAGER.getPublicKey();
         this.keyPair = KeyUtils.generate("RSA", 1024);
-        this.certificate = null;
-        this.otherCertificate = null;
         this.otherKeyAuthenticated = false;
+        loadKeyStore();
+    }
+
+    /**
+     * Initialises a PKCS12 keystore for in-memory storage
+     * of secrets
+     */
+    private void loadKeyStore() {
+        try {
+            this.keyStore = KeyStore.getInstance("PKCS12");
+        } catch (KeyStoreException e) {
+            e.printStackTrace();
+        }
+        try {
+            this.keyStore.load(null, null);
+        } catch (IOException | NoSuchAlgorithmException | CertificateException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -84,7 +99,7 @@ public class Client {
             e.printStackTrace();
         }
 
-        PRETTIER.print("System", "Image Directory?");
+        PRETTIER.print("System", "Directory?");
         try {
             path = stdin.readLine();
             while (!Files.isDirectory(Paths.get(path))) {
@@ -105,10 +120,16 @@ public class Client {
 
     /**
      * Generates a certificate containing the public key of the client
-     * signed using the private key of the Certificate Authority
+     * signed using the private key of the Certificate Authority.
+     * Stores the certificate in an in-memory key store.
      */
     private void getCASignedCertificate() {
-        this.certificate = SECRETS_MANAGER.generateCertificate(this.alias, this.keyPair.getPublic());
+        X509Certificate certificate = SECRETS_MANAGER.generateCertificate(this.alias, this.keyPair.getPublic());
+        try {
+            keyStore.setCertificateEntry(alias, certificate);
+        } catch (KeyStoreException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -150,24 +171,38 @@ public class Client {
         this.alias = alias;
     }
 
-    public X509Certificate getCertificate() {
-        return certificate;
+    public X509Certificate getCertificate() throws KeyStoreException {
+        return (X509Certificate) keyStore.getCertificate(alias);
     }
 
-    public X509Certificate getOtherCertificate() {
-        return otherCertificate;
+    /**
+     * Stores a certificate from a connected client
+     * in the in-memory key store and initiates verification.
+     *
+     * @param otherCertificate signed certificate of other client
+     */
+    public void storeOtherCertificate(X509Certificate otherCertificate) {
+        try {
+            keyStore.setCertificateEntry("other", otherCertificate);
+        } catch (KeyStoreException e) {
+            e.printStackTrace();
+        }
+        verifyOtherCertificate();
     }
 
-    public void setOtherCertificate(X509Certificate otherCertificate) {
-        this.otherCertificate = otherCertificate;
-    }
-
+    /**
+     * Verifies the authenticity of a client using it's certificate.
+     * The certificate is verified using the public key
+     * of the trusted Certificate Authority.
+     * If the certificate is unverified a <code>InvalidKeyException</code>
+     * is thrown.
+     */
     public void verifyOtherCertificate() {
         try {
-            this.otherCertificate.verify(CAPublicKey);
+            this.keyStore.getCertificate("other").verify(CAPublicKey);
             this.otherKeyAuthenticated = true;
 
-        } catch (CertificateException | NoSuchAlgorithmException | InvalidKeyException | NoSuchProviderException | SignatureException e) {
+        } catch (CertificateException | NoSuchAlgorithmException | InvalidKeyException | NoSuchProviderException | SignatureException | KeyStoreException e) {
             e.printStackTrace();
             this.otherKeyAuthenticated = false;
         }

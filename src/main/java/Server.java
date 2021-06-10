@@ -1,6 +1,7 @@
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.security.KeyStoreException;
 import java.security.cert.X509Certificate;
 import java.util.HashSet;
 import java.util.Set;
@@ -76,7 +77,7 @@ public class Server {
                 handler.start();
             }
 
-        } catch (IOException ex) {
+        } catch (IOException | KeyStoreException ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
             ex.printStackTrace();
         }
@@ -116,11 +117,11 @@ public class Server {
      * @param alias  alias of client attached to the certificate
      * @param source    handler that manages communication with the source client
      */
-    public void deliverCertificate(String alias, ClientHandler source) throws IOException {
+    public void deliverCertificate(String alias, ClientHandler source) throws IOException, KeyStoreException {
         for (ClientHandler handler : handlers) {
             if (handler != source) {
                 handler.write(session.getCertificate(alias));
-                LOGGER.info("Delivered X.509 certificate from " + alias);
+                LOGGER.info("Delivered X.509 certificate from client " + alias);
                 session.log(alias);
             }
         }
@@ -143,10 +144,13 @@ public class Server {
      * @param certificate signed certificate containing client public key
      * @param alias    client alias
      */
-    public void storeCertificate(X509Certificate certificate, String alias) {
-        session.storeCertificate(certificate, alias);
-        LOGGER.info("Received X.509 certificate from " + alias);
-        LOGGER.info("Session certificates " + session.getCertificates());
+    public void storeCertificate(X509Certificate certificate, String alias){
+        try {
+            session.storeCertificate(certificate, alias);
+        } catch (Exception ex) {
+            LOGGER.log(Level.WARNING, ex.getMessage());
+        }
+        LOGGER.info("Cached X.509 certificate from client " + alias);
         if (session.getAliases().size() == 2) {
             initiateSession();
         }
@@ -161,12 +165,17 @@ public class Server {
      * @param handler  handler that manages communication with the specified client
      */
     public void disconnectClient(String alias, ClientHandler handler) {
-        boolean disconnect = session.disconnectClient(alias);
+        boolean disconnect = false;
+        try {
+            disconnect = session.disconnectClient(alias);
+        } catch (Exception ex) {
+            LOGGER.log(Level.WARNING, ex.getMessage());
+        }
         if (disconnect) {
             handlers.remove(handler);
             LOGGER.info("Client " + alias + " has disconnected");
             try {
-                String message = PRETTIER.toString("System", alias + " has left the matrix.");
+                String message = alias + " has left the matrix.";
                 CommandMessage quitMessage = COMMAND_MESSAGE_FACTORY.getCommandMessage("QUIT", message);
                 broadcast(quitMessage);
             } catch (IOException ex) {

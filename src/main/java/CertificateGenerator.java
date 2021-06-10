@@ -35,9 +35,13 @@ public class CertificateGenerator {
         X509v3CertificateBuilder v3CertificateBuilder = new JcaX509v3CertificateBuilder(issuer, sn, before, after, subject, clientPublicKey);
         X509Certificate certificate = null;
         try {
-            ContentSigner signer = new JcaContentSignerBuilder("SHA256WithRSAEncryption").setProvider(new BouncyCastleProvider()).build(CAPrivateKey);
+            ContentSigner signer = new JcaContentSignerBuilder("SHA256WithRSAEncryption")
+                    .setProvider(new BouncyCastleProvider())
+                    .build(CAPrivateKey);
             X509CertificateHolder certificateHolder = v3CertificateBuilder.build(signer);
-            certificate = new JcaX509CertificateConverter().setProvider(new BouncyCastleProvider()).getCertificate(certificateHolder);
+            certificate = new JcaX509CertificateConverter()
+                    .setProvider(new BouncyCastleProvider())
+                    .getCertificate(certificateHolder);
         } catch (CertificateException | OperatorCreationException e) {
             e.printStackTrace();
         }

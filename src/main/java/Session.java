@@ -1,3 +1,8 @@
+import java.io.IOException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -38,15 +43,33 @@ public class Session {
 
     private final AtomicInteger authenticatedClients;
     private final Set<String> aliases = new HashSet<>();
-    private final Map<String, X509Certificate> certificates = new HashMap<>();
     private final Map<String, Boolean> log = new HashMap<>();
+    private KeyStore keyStore;
     private volatile boolean alive;
     private volatile boolean active;
 
-    public Session() {
+    public Session() throws KeyStoreException {
         this.alive = false;
         this.active = false;
         this.authenticatedClients = new AtomicInteger(0);
+        loadKeyStore();
+    }
+
+    /**
+     * Initialises a PKCS12 keystore for in-memory storage
+     * of trusted certificates
+     */
+    private void loadKeyStore() {
+        try {
+            this.keyStore = KeyStore.getInstance("PKCS12");
+        } catch (KeyStoreException e) {
+            e.printStackTrace();
+        }
+        try {
+            this.keyStore.load(null, null);
+        } catch (IOException | NoSuchAlgorithmException | CertificateException e) {
+            e.printStackTrace();
+        }
     }
 
     public boolean isAlive() {
@@ -87,19 +110,14 @@ public class Session {
         this.authenticatedClients.getAndIncrement();
     }
 
-    public Map<String, X509Certificate> getCertificates() {
-        return certificates;
-    }
-
-    //TODO
-
     /**
      * Returns the stored certificate for a specified client
      *
-     * @return <code>Object</code>
+     * @return <code>X509Certificate</code>
+     * @throws {@link KeyStoreException}
      */
-    public Object getCertificate(String alias) {
-        return certificates.get(alias);
+    public X509Certificate getCertificate(String alias) throws KeyStoreException {
+        return (X509Certificate) keyStore.getCertificate(alias);
     }
 
     public Set<String> getAliases() {
@@ -111,19 +129,19 @@ public class Session {
     }
 
     /**
-     * Stores a client certificate in internal state
+     * Stores a client certificate as an entry of an in-memory {@link KeyStore}
      * and adds a log entry to track certificate delivery
      *
      * @param certificate signed certificate containing client public key
-     * @param alias    client alias
+     * @param alias       client alias
      */
-    public void storeCertificate(X509Certificate certificate, String alias) {
-        certificates.put(alias, certificate);
+    public void storeCertificate(X509Certificate certificate, String alias){
+        try {
+            keyStore.setCertificateEntry(alias, certificate);
+        } catch (KeyStoreException e) {
+            e.printStackTrace();
+        }
         log.put(alias, false);
-    }
-
-    public Map<String, Boolean> getLog() {
-        return log;
     }
 
     /**
@@ -160,10 +178,14 @@ public class Session {
      * @return <code>boolean</code> returns <code>True</code> if client is successfully disconnected
      * <code>False</code> otherwise
      */
-    public boolean disconnectClient(String alias) {
+    public boolean disconnectClient(String alias){
         boolean disconnect = aliases.remove(alias);
         if (disconnect) {
-            certificates.remove(alias);
+            try {
+                keyStore.deleteEntry(alias);
+            } catch (KeyStoreException e) {
+                e.printStackTrace();
+            }
             log.remove(alias);
             resetLog();
         }
