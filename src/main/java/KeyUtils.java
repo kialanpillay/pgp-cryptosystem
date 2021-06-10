@@ -1,5 +1,6 @@
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
 import java.security.*;
 
 public class KeyUtils {
@@ -31,11 +32,16 @@ public class KeyUtils {
         return generator.generateKeyPair();
     }
 
-    public static SecretKey generateSessionKey(int keySize) throws NoSuchAlgorithmException {
+    public static SecretKey generateSessionKey() throws NoSuchAlgorithmException {
         KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
-        keyGenerator.init(keySize);
+        keyGenerator.init(128);
         return keyGenerator.generateKey();
     }
 
+    public static IvParameterSpec generateIV() {
+        byte[] initializationVector = new byte[16];
+        new SecureRandom().nextBytes(initializationVector);
+        return new IvParameterSpec(initializationVector);
+    }
 
 }
