@@ -1,3 +1,4 @@
+import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -34,7 +35,7 @@ public class Session {
 
     private final AtomicInteger authenticatedClients;
     private final Set<String> usernames = new HashSet<>();
-    private final Map<String, Object> certificates = new HashMap<>();
+    private final Map<String, X509Certificate> certificates = new HashMap<>();
     private final Map<String, Boolean> log = new HashMap<>();
     private volatile boolean alive;
     private volatile boolean active;
@@ -83,7 +84,7 @@ public class Session {
         this.authenticatedClients.getAndIncrement();
     }
 
-    public Map<String, Object> getCertificates() {
+    public Map<String, X509Certificate> getCertificates() {
         return certificates;
     }
 
@@ -113,7 +114,7 @@ public class Session {
      * @param certificate signed certificate containing client public key
      * @param username    client username
      */
-    public void storeCertificate(Object certificate, String username) {
+    public void storeCertificate(X509Certificate certificate, String username) {
         certificates.put(username, certificate);
         log.put(username, false);
     }

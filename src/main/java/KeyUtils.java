@@ -62,7 +62,6 @@ public class KeyUtils {
         generator.initialize(DEFAULT_KEY_SIZE, random);
         return generator.generateKeyPair();
     }
-
     public static SecretKey generateSessionKey() throws NoSuchAlgorithmException {
         javax.crypto.KeyGenerator keyGenerator = javax.crypto.KeyGenerator.getInstance("AES");
         keyGenerator.init(128);
