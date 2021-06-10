@@ -2,6 +2,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.security.cert.X509Certificate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -52,9 +53,8 @@ public class ClientHandler extends Thread {
             String username = inputStream.readObject().toString();
             server.storeUsername(username);
 
-            //TODO
-            Object certificate;
-            certificate = inputStream.readObject().toString();
+            X509Certificate certificate;
+            certificate = (X509Certificate)inputStream.readObject();
             server.storeCertificate(certificate, username);
 
             while (!server.isSessionAlive()) {

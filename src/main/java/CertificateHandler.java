@@ -1,6 +1,7 @@
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.Socket;
+import java.security.cert.X509Certificate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -27,9 +28,8 @@ public class CertificateHandler extends Thread {
     }
 
     public void run() {
-        //TODO: X.509 Certificate Decryption
         try {
-            Object certificate = inputStream.readObject().toString();
+            X509Certificate certificate = (X509Certificate)inputStream.readObject();
             client.setOtherCertificate(certificate);
             System.out.println(certificate);
         } catch (IOException | ClassNotFoundException ex) {

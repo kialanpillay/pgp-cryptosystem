@@ -1,6 +1,7 @@
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.security.cert.X509Certificate;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -139,7 +140,7 @@ public class Server {
      * @param certificate signed certificate containing client public key
      * @param username    client username
      */
-    public void storeCertificate(Object certificate, String username) {
+    public void storeCertificate(X509Certificate certificate, String username) {
         session.storeCertificate(certificate, username);
         LOGGER.info("Received X.509 certificate from " + username);
         LOGGER.info("Session certificates " + session.getCertificates());

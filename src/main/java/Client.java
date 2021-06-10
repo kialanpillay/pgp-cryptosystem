@@ -1,7 +1,8 @@
 import java.io.*;
 import java.net.Socket;
-import java.security.KeyPair;
-import java.security.NoSuchAlgorithmException;
+import java.security.*;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -21,14 +22,16 @@ public class Client {
 
     private static final Logger LOGGER = Logger.getLogger(Client.class.getName());
     private static final Prettier PRETTIER = new Prettier();
+    private static final SecretsManager SECRETS_MANAGER = new SecretsManager();
     private final String hostname;
     private final int port;
-    private final Object certificate;
-    private final boolean otherKeyAuthenticated;
+    private final X509Certificate certificate;
+    private final PublicKey CAPublicKey;
+    private X509Certificate otherCertificate;
+    private boolean otherKeyAuthenticated;
     private KeyPair keyPair;
     private String username;
     private String path;
-    private Object otherCertificate;
 
     /**
      * Class constructor specifying server hostname and port
@@ -36,14 +39,14 @@ public class Client {
     public Client(String hostname, int port) {
         this.hostname = hostname;
         this.port = port;
-
+        this.CAPublicKey = SECRETS_MANAGER.getPublicKey();
+        System.out.println(this.CAPublicKey.getAlgorithm());
         try {
             this.keyPair = KeyGenerator.generate("RSA", 1024);
         } catch (NoSuchAlgorithmException ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
         }
-        //TODO
-        this.certificate = null;
+        this.certificate = SECRETS_MANAGER.generateCertificate(this.username, this.keyPair.getPublic());
         this.otherCertificate = null;
         this.otherKeyAuthenticated = false;
     }
@@ -57,10 +60,10 @@ public class Client {
      * @param args command line parameters
      */
     public static void main(String[] args) {
-        if (args.length < 2) return;
+        // if (args.length < 2) return;
 
-        String hostname = args[0];
-        int port = Integer.parseInt(args[1]);
+        String hostname = "localhost";
+        int port = 4444;
 
         Client client = new Client(hostname, port);
 
@@ -100,9 +103,9 @@ public class Client {
             ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
             ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream());
 
-            new AuthenticationHandler(socket, outputStream,this).start();
+            new AuthenticationHandler(socket, outputStream, this).start();
             new CertificateHandler(socket, inputStream, this).start();
-            new MessageDispatchHandler(socket, outputStream,this).start();
+            new MessageDispatchHandler(socket, outputStream, this).start();
             new MessageRetrievalHandler(socket, inputStream, this).start();
 
         } catch (IOException ex) {
@@ -127,16 +130,28 @@ public class Client {
         this.username = username;
     }
 
-    public Object getCertificate() {
+    public X509Certificate getCertificate() {
         return certificate;
     }
 
-    public Object getOtherCertificate() {
+    public X509Certificate getOtherCertificate() {
         return otherCertificate;
     }
 
-    public void setOtherCertificate(Object otherCertificate) {
+    public void setOtherCertificate(X509Certificate otherCertificate) {
         this.otherCertificate = otherCertificate;
+    }
+
+    private void verifyOtherCertificate() {
+        try {
+            this.otherCertificate.verify(CAPublicKey);
+            System.out.println(this.otherCertificate.getPublicKey());
+            this.otherKeyAuthenticated = true;
+
+        } catch (CertificateException | NoSuchAlgorithmException | InvalidKeyException | NoSuchProviderException | SignatureException e) {
+            e.printStackTrace();
+            this.otherKeyAuthenticated = false;
+        }
     }
 
     public boolean isOtherKeyAuthenticated() {

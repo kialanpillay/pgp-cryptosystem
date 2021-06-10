@@ -1,6 +1,7 @@
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.security.cert.X509Certificate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -38,15 +39,12 @@ public class AuthenticationHandler extends Thread {
             LOGGER.log(Level.WARNING, ex.getMessage());
         }
 
-        //TODO: client.getCertificate()
-        String certificate = "X.509CERT - " + client.getUsername();
+        X509Certificate certificate = client.getCertificate();
         try {
             outputStream.writeObject(certificate);
         } catch (IOException ex) {
             LOGGER.log(Level.WARNING, ex.getMessage());
         }
-
-        //TODO: Certificate Verification
 
         while (!client.isOtherKeyAuthenticated()) {
             try {
