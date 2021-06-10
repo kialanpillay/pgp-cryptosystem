@@ -1,16 +1,19 @@
+import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
 /**
- * <code>KeyGenerator</code> is a concrete wrapper class that generates
- * key-pairs using the {@link java.security.KeyPairGenerator}
+ * <code>KeyUtils</code> is a concrete wrapper class that generates
+ * key-pairs using the {@link java.security.KeyPairGenerator} and
+ * keys using the {@link javax.crypto.KeyGenerator}
  *
  * @author Kialan Pillay
  * @version %I%, %G%
  */
-public class KeyGenerator {
+public class KeyUtils {
 
     private static final String DEFAULT_ALGORITHM = "RSA";
     private static final int DEFAULT_KEY_SIZE = 2048;
@@ -18,7 +21,7 @@ public class KeyGenerator {
     /**
      * Sole class constructor
      */
-    private KeyGenerator() {
+    private KeyUtils() {
     }
 
     /**
@@ -58,5 +61,17 @@ public class KeyGenerator {
         SecureRandom random = SecureRandom.getInstanceStrong();
         generator.initialize(DEFAULT_KEY_SIZE, random);
         return generator.generateKeyPair();
+    }
+
+    public static SecretKey generateSessionKey() throws NoSuchAlgorithmException {
+        javax.crypto.KeyGenerator keyGenerator = javax.crypto.KeyGenerator.getInstance("AES");
+        keyGenerator.init(128);
+        return keyGenerator.generateKey();
+    }
+
+    public static IvParameterSpec generateIV() {
+        byte[] initializationVector = new byte[16];
+        new SecureRandom().nextBytes(initializationVector);
+        return new IvParameterSpec(initializationVector);
     }
 }
