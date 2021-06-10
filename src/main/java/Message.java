@@ -50,4 +50,6 @@ public class Message implements Serializable {
     public void setCaption(String caption) {
         this.caption = caption;
     }
+
+    public String toString() { return caption + base64Image; }
 }
