@@ -1,5 +1,7 @@
 import java.io.*;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -33,7 +35,7 @@ public class Client {
     private X509Certificate certificate;
     private X509Certificate otherCertificate;
     private boolean otherKeyAuthenticated;
-    private String username;
+    private String alias;
     private String path;
 
     /**
@@ -52,7 +54,7 @@ public class Client {
     /**
      * Starts a client instance using the specified hostname and port.
      * If no hostname or port is specified the operation is aborted.
-     * Retrieves the client's username and output directory from the console
+     * Retrieves the client's alias and output directory from the console
      * and initiates a connection request to the server.
      *
      * @param args command line parameters
@@ -70,26 +72,32 @@ public class Client {
 
         Client client = new Client(hostname, port);
 
-        String username = "";
+        String alias = "";
         String path = "";
         BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
 
-        PRETTIER.print("System", "Welcome to CryptoSystem. I transfer your images more securely than FaceBook.");
-        PRETTIER.print("System", "Who are you?");
+        PRETTIER.print("System", "Welcome to CryptoSystem. Safe. Secure. Communication.");
+        PRETTIER.print("System", "Alias?");
         try {
-            username = stdin.readLine();
+            alias = stdin.readLine();
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        PRETTIER.print("System", "Where shall I store your images?");
+        PRETTIER.print("System", "Image Directory?");
         try {
             path = stdin.readLine();
+            while (!Files.isDirectory(Paths.get(path))) {
+                PRETTIER.print("System", "This is not a valid directory. Try again.");
+                path = stdin.readLine();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        client.setUsername(username);
+        PRETTIER.print("System", "Please wait until a secure session is established.");
+
+        client.setAlias(alias);
         client.setPath(path);
         client.getCASignedCertificate();
         client.connect();
@@ -100,7 +108,7 @@ public class Client {
      * signed using the private key of the Certificate Authority
      */
     private void getCASignedCertificate() {
-        this.certificate = SECRETS_MANAGER.generateCertificate(this.username, this.keyPair.getPublic());
+        this.certificate = SECRETS_MANAGER.generateCertificate(this.alias, this.keyPair.getPublic());
     }
 
     /**
@@ -134,12 +142,12 @@ public class Client {
         this.path = path;
     }
 
-    public String getUsername() {
-        return this.username;
+    public String getAlias() {
+        return this.alias;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setAlias(String alias) {
+        this.alias = alias;
     }
 
     public X509Certificate getCertificate() {
@@ -157,7 +165,6 @@ public class Client {
     public void verifyOtherCertificate() {
         try {
             this.otherCertificate.verify(CAPublicKey);
-            System.out.println(this.otherCertificate.getPublicKey());
             this.otherKeyAuthenticated = true;
 
         } catch (CertificateException | NoSuchAlgorithmException | InvalidKeyException | NoSuchProviderException | SignatureException e) {

@@ -51,8 +51,7 @@ public class CertificateAuthority {
     private static void store(
             String filename, char[] password,
             KeyPair generatedKeyPair) throws KeyStoreException, IOException,
-            NoSuchAlgorithmException, CertificateException,
-            OperatorCreationException {
+            NoSuchAlgorithmException, CertificateException {
 
         X509Certificate rootCertificate = generateSelfSignedCertificate(generatedKeyPair);
 

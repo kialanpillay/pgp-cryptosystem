@@ -11,6 +11,7 @@ import java.util.logging.Logger;
 public class MessageRetrievalHandler extends Thread {
 
     private static final Logger LOGGER = Logger.getLogger(MessageRetrievalHandler.class.getName());
+    private static final Prettier PRETTIER = new Prettier();
     private final Socket socket;
     private final Client client;
     private ObjectInputStream inputStream;
@@ -47,7 +48,8 @@ public class MessageRetrievalHandler extends Thread {
                     } catch (IOException ex) {
                         LOGGER.log(Level.WARNING, ex.getMessage());
                     }
-                    System.out.println(m.getCaption());
+                    PRETTIER.print("Client", m.getCaption());
+                    PRETTIER.print("System", "Enter the absolute path of an image to send.");
                 }
 
                 if (message instanceof QuitMessage) {

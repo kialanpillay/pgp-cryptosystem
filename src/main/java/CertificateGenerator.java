@@ -24,10 +24,10 @@ public class CertificateGenerator {
 
     }
 
-    public static X509Certificate generate(String username, PublicKey clientPublicKey, PrivateKey CAPrivateKey) {
+    public static X509Certificate generate(String alias, PublicKey clientPublicKey, PrivateKey CAPrivateKey) {
 
         X500Name issuer = new X500Name("CN=CA");
-        X500Name subject = new X500Name("CN=" + username);
+        X500Name subject = new X500Name("CN=" + alias);
         Date before = new Date();
         Date after = new GregorianCalendar(2021, Calendar.DECEMBER, 31).getTime();
         BigInteger sn = new BigInteger(64, new SecureRandom());

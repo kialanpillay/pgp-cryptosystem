@@ -44,7 +44,7 @@ public class Prettier {
                 .append(identity.toUpperCase())
                 .append("]")
                 .append(" - ")
-                .append(message));
+                .append(message.toUpperCase()));
     }
 
     /**
@@ -63,6 +63,6 @@ public class Prettier {
                 .append(identity.toUpperCase())
                 .append("]")
                 .append(" - ")
-                .append(message).toString();
+                .append(message.toUpperCase()).toString();
     }
 }
