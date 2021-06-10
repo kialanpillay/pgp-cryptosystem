@@ -18,7 +18,6 @@ public class Message implements Serializable {
         return caption;
     }
 
-    // TODO Need to discuss parsing the "caption+base65Image" concatenation back into Message
     public String toString() { return caption + base64Image; }
 
     public void setBase64Image(String base64Image) {
