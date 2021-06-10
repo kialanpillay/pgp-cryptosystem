@@ -27,7 +27,7 @@ import javax.crypto.spec.SecretKeySpec;
  * Protocol (PGP) encoding and decoding functionality for a {@link Message}
  * using the {@link java.security.MessageDigest} for hashing,
  * {@link java.util.zip} for compression and {@link javax.crypto.Cipher} for
- * encryption/decription.
+ * encryption/decryption.
  *
  * @author Aidan Bailey, Emily Morris
  * @version %I%, %G%
