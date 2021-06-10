@@ -6,6 +6,9 @@ import java.io.Serializable;
  * the recipient through certificate verification
  *
  * @author Kialan Pillay
+ * @author Aidan Bailey
+ * @author Insaaf Dhansay
+ * @author Emily Morris
  * @version %I%, %G%
  */
 public interface CommandMessage extends Serializable {

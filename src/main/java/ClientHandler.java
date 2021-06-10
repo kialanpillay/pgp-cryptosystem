@@ -15,6 +15,9 @@ import java.util.logging.Logger;
  * {@link ObjectInputStream} and writes to an {@link ObjectOutputStream}.
  *
  * @author Kialan Pillay
+ * @author Aidan Bailey
+ * @author Insaaf Dhansay
+ * @author Emily Morris
  * @version %I%, %G%
  */
 public class ClientHandler extends Thread {

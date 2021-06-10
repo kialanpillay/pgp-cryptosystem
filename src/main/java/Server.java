@@ -16,6 +16,9 @@ import java.util.logging.Logger;
  * client in parallel.
  *
  * @author Kialan Pillay
+ * @author Aidan Bailey
+ * @author Insaaf Dhansay
+ * @author Emily Morris
  * @version %I%, %G%
  */
 public class Server {

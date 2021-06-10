@@ -29,7 +29,10 @@ import javax.crypto.spec.SecretKeySpec;
  * {@link java.util.zip} for compression and {@link javax.crypto.Cipher} for
  * encryption/decryption.
  *
- * @author Aidan Bailey, Emily Morris
+ * @author Aidan Bailey
+ * @author Emily Morris
+ * @author Insaaf Dhansay
+ * @author Kialan Pillay
  * @version %I%, %G%
  */
 public class PGPUtils {

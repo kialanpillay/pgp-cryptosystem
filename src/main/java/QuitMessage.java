@@ -3,6 +3,9 @@
  * which allow a client to dispatch a disconnection request to the server.
  *
  * @author Kialan Pillay
+ * @author Aidan Bailey
+ * @author Insaaf Dhansay
+ * @author Emily Morris
  * @version %I%, %G%
  */
 public class QuitMessage implements CommandMessage {

@@ -12,6 +12,9 @@ import java.util.logging.Logger;
  * for receiving a signed certificate from another client.
  *
  * @author Kialan Pillay
+ * @author Aidan Bailey
+ * @author Insaaf Dhansay
+ * @author Emily Morris
  * @version %I%, %G%
  */
 public class CertificateHandler extends Thread {

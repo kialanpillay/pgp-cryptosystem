@@ -7,6 +7,9 @@ import java.io.Serializable;
  * caption.
  *
  * @author Kialan Pillay
+ * @author Aidan Bailey
+ * @author Insaaf Dhansay
+ * @author Emily Morris
  * @version %I%, %G%
  */
 public class Message implements Serializable {

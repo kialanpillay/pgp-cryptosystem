@@ -12,7 +12,10 @@ import javax.crypto.spec.IvParameterSpec;
  * {@link javax.crypto.KeyGenerator} and initialization vectors using the
  * {@link javax.crypto.spec.IvParameterSpec}.
  *
+ * @author Aidan Bailey
+ * @author Emily Morris
  * @author Kialan Pillay
+ * @author Insaaf Dhansay
  * @version %I%, %G%
  */
 public class KeyUtils {

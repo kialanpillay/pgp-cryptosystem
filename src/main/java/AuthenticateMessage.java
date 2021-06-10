@@ -4,6 +4,9 @@
  * the other party through certificate verification.
  *
  * @author Kialan Pillay
+ * @author Aidan Bailey
+ * @author Insaaf Dhansay
+ * @author Emily Morris
  * @version %I%, %G%
  */
 public class AuthenticateMessage implements CommandMessage {

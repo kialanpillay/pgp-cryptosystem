@@ -3,7 +3,10 @@ import java.util.Date;
 /**
  * <code>Prettier</code> is a concrete class that generates formatted output for clients.
  *
- * @author      Kialan Pillay
+ * @author Kialan Pillay
+ * @author Aidan Bailey
+ * @author Insaaf Dhansay
+ * @author Emily Morris
  * @version     %I%, %G%
  */
 public class Prettier {
