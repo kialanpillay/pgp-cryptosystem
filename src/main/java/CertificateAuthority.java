@@ -20,7 +20,7 @@ import java.util.GregorianCalendar;
 public class CertificateAuthority {
 
     public static void main(String[] args) throws Exception {
-        KeyPair CAKeyPair = KeyGenerator.generate();
+        KeyPair CAKeyPair = KeyUtils.generate();
         String filename = "keystore.pkcs12";
         char[] password = "crypto".toCharArray();
 

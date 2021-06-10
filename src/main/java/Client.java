@@ -25,28 +25,23 @@ public class Client {
     private static final SecretsManager SECRETS_MANAGER = new SecretsManager();
     private final String hostname;
     private final int port;
-    private final X509Certificate certificate;
     private final PublicKey CAPublicKey;
+    private final KeyPair keyPair;
+    private X509Certificate certificate;
     private X509Certificate otherCertificate;
     private boolean otherKeyAuthenticated;
-    private KeyPair keyPair;
     private String username;
     private String path;
 
     /**
      * Class constructor specifying server hostname and port
      */
-    public Client(String hostname, int port) {
+    public Client(String hostname, int port) throws NoSuchAlgorithmException {
         this.hostname = hostname;
         this.port = port;
         this.CAPublicKey = SECRETS_MANAGER.getPublicKey();
-        System.out.println(this.CAPublicKey.getAlgorithm());
-        try {
-            this.keyPair = KeyGenerator.generate("RSA", 1024);
-        } catch (NoSuchAlgorithmException ex) {
-            LOGGER.log(Level.SEVERE, ex.getMessage());
-        }
-        this.certificate = SECRETS_MANAGER.generateCertificate(this.username, this.keyPair.getPublic());
+        this.keyPair = KeyUtils.generate("RSA", 1024);
+        this.certificate = null;
         this.otherCertificate = null;
         this.otherKeyAuthenticated = false;
     }
@@ -59,11 +54,16 @@ public class Client {
      *
      * @param args command line parameters
      */
-    public static void main(String[] args) {
-        // if (args.length < 2) return;
-
+    public static void main(String[] args) throws NoSuchAlgorithmException {
         String hostname = "localhost";
         int port = 4444;
+
+        if (args.length != 0 && args.length != 2) {
+            return;
+        } else if (args.length == 2) {
+            hostname = args[0];
+            port = Integer.parseInt(args[1]);
+        }
 
         Client client = new Client(hostname, port);
 
@@ -88,7 +88,16 @@ public class Client {
 
         client.setUsername(username);
         client.setPath(path);
+        client.getCASignedCertificate();
         client.connect();
+    }
+
+    /**
+     * Generates a certificate containing the public key of the client
+     * signed using the private key of the Certificate Authority
+     */
+    private void getCASignedCertificate() {
+        this.certificate = SECRETS_MANAGER.generateCertificate(this.username, this.keyPair.getPublic());
     }
 
     /**
@@ -97,7 +106,7 @@ public class Client {
      * and {@link MessageRetrievalHandler} thread to handle inbound
      * and outbound communications
      */
-    public void connect() {
+    private void connect() {
         try {
             Socket socket = new Socket(hostname, port);
             ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
@@ -142,7 +151,7 @@ public class Client {
         this.otherCertificate = otherCertificate;
     }
 
-    private void verifyOtherCertificate() {
+    public void verifyOtherCertificate() {
         try {
             this.otherCertificate.verify(CAPublicKey);
             System.out.println(this.otherCertificate.getPublicKey());

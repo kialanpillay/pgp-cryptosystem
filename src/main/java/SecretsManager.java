@@ -1,22 +1,8 @@
-import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.cert.X509CertificateHolder;
-import org.bouncycastle.cert.X509v3CertificateBuilder;
-import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
-import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.operator.ContentSigner;
-import org.bouncycastle.operator.OperatorCreationException;
-import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
-
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.math.BigInteger;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
 
 public class SecretsManager {
 
@@ -26,7 +12,7 @@ public class SecretsManager {
 
     public SecretsManager() {
         try {
-            this.CAKeyPair = load(KEYSTORE_PASSWORD, KEYSTORE_FILENAME.toCharArray());
+            this.CAKeyPair = load(KEYSTORE_FILENAME, KEYSTORE_PASSWORD.toCharArray());
         } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException | UnrecoverableEntryException e) {
             e.printStackTrace();
         }
@@ -36,7 +22,7 @@ public class SecretsManager {
         return CAKeyPair.getPublic();
     }
 
-    public X509Certificate generateCertificate(String username, PublicKey publicKey){
+    public X509Certificate generateCertificate(String username, PublicKey publicKey) {
         return CertificateGenerator.generate(username, publicKey, CAKeyPair.getPrivate());
     }
 

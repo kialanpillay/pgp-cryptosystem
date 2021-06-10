@@ -20,9 +20,10 @@ import java.util.GregorianCalendar;
 
 public class CertificateGenerator {
 
-    private CertificateGenerator(){
+    private CertificateGenerator() {
 
     }
+
     public static X509Certificate generate(String username, PublicKey clientPublicKey, PrivateKey CAPrivateKey) {
 
         X500Name issuer = new X500Name("CN=CA");

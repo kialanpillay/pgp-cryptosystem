@@ -10,7 +10,7 @@ import java.security.SecureRandom;
  * @author Kialan Pillay
  * @version %I%, %G%
  */
-public class KeyGenerator {
+public class KeyUtils {
 
     private static final String DEFAULT_ALGORITHM = "RSA";
     private static final int DEFAULT_KEY_SIZE = 2048;
@@ -18,7 +18,7 @@ public class KeyGenerator {
     /**
      * Sole class constructor
      */
-    private KeyGenerator() {
+    private KeyUtils() {
     }
 
     /**

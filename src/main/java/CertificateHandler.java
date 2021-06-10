@@ -29,9 +29,9 @@ public class CertificateHandler extends Thread {
 
     public void run() {
         try {
-            X509Certificate certificate = (X509Certificate)inputStream.readObject();
+            X509Certificate certificate = (X509Certificate) inputStream.readObject();
             client.setOtherCertificate(certificate);
-            System.out.println(certificate);
+            client.verifyOtherCertificate();
         } catch (IOException | ClassNotFoundException ex) {
             LOGGER.log(Level.WARNING, ex.getMessage());
         }
