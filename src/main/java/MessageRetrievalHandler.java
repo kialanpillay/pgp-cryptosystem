@@ -15,25 +15,21 @@ public class MessageRetrievalHandler extends Thread {
     private final Client client;
     private ObjectInputStream inputStream;
 
-    public MessageRetrievalHandler(Socket socket, Client client) {
+    public MessageRetrievalHandler(Socket socket, ObjectInputStream inputStream, Client client) {
         this.socket = socket;
         this.client = client;
-        try {
-            inputStream = new ObjectInputStream(socket.getInputStream());
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
+        this.inputStream = inputStream;
     }
 
     public void run() {
-        //TODO: X.509 Certificate Decryption
-        try {
-            Object certificate = inputStream.readObject().toString();
-            client.setOtherCertificate(certificate);
-            System.out.println(certificate);
-        } catch (IOException | ClassNotFoundException ex) {
-            LOGGER.log(Level.WARNING, ex.getMessage());
+        while (!client.isOtherKeyAuthenticated()) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException ex) {
+                LOGGER.log(Level.WARNING, ex.getMessage());
+            }
         }
+
         while (true) {
             try {
                 //TODO: PGP Decryption
