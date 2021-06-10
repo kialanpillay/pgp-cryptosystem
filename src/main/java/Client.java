@@ -1,6 +1,4 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.Socket;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
@@ -99,8 +97,13 @@ public class Client {
     public void connect() {
         try {
             Socket socket = new Socket(hostname, port);
-            new MessageDispatchHandler(socket, this).start();
-            new MessageRetrievalHandler(socket, this).start();
+            ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
+            ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream());
+
+            new AuthenticationHandler(socket, outputStream,this).start();
+            new CertificateHandler(socket, inputStream, this).start();
+            new MessageDispatchHandler(socket, outputStream,this).start();
+            new MessageRetrievalHandler(socket, inputStream, this).start();
 
         } catch (IOException ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());

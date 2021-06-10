@@ -16,14 +16,10 @@ public class MessageDispatchHandler extends Thread {
     private final CommandMessageFactory commandMessageFactory = new CommandMessageFactory();
     private ObjectOutputStream outputStream;
 
-    public MessageDispatchHandler(Socket socket, Client client) {
+    public MessageDispatchHandler(Socket socket, ObjectOutputStream outputStream, Client client) {
         this.socket = socket;
         this.client = client;
-        try {
-            outputStream = new ObjectOutputStream(socket.getOutputStream());
-        } catch (IOException ex) {
-            LOGGER.log(Level.WARNING, ex.getMessage());
-        }
+        this.outputStream = outputStream;
     }
 
     public static String encodeImageToBase64(File file) {
@@ -41,36 +37,12 @@ public class MessageDispatchHandler extends Thread {
     }
 
     public void run() {
-
-        try {
-            outputStream.writeObject(client.getUsername());
-        } catch (IOException ex) {
-            LOGGER.log(Level.WARNING, ex.getMessage());
-        }
-
-        //TODO: client.getCertificate()
-        String certificate = "cert" + client.getUsername();
-        try {
-            outputStream.writeObject(certificate);
-        } catch (IOException ex) {
-            LOGGER.log(Level.WARNING, ex.getMessage());
-        }
-
-        //TODO: Certificate Verification
-
         while (!client.isOtherKeyAuthenticated()) {
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException ex) {
                 LOGGER.log(Level.WARNING, ex.getMessage());
             }
-        }
-
-        CommandMessage commandMessage = commandMessageFactory.getCommandMessage("AUTH", client.getUsername());
-        try {
-            outputStream.writeObject(commandMessage);
-        } catch (IOException ex) {
-            LOGGER.log(Level.WARNING, ex.getMessage());
         }
 
         Object message = null;
