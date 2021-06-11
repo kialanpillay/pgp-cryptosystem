@@ -9,14 +9,9 @@ repositories {
     mavenCentral()
 }
 
-task(runServer, dependsOn: 'classes', type: JavaExec) {
-    main = 'Server'
-    classpath = sourceSets.main.runtimeClasspath
-    args 4444
-}
-
-task(runClient, dependsOn: 'classes', type: JavaExec) {
-    main = 'Client'
+task run(type:JavaExec) {
+    standardInput = System.in
+    main = project.hasProperty("mainClassName") ? getProperty("mainClassName") : "CertificateAuthority"
     classpath = sourceSets.main.runtimeClasspath
 }
 
