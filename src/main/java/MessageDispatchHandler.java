@@ -1,8 +1,15 @@
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import java.io.*;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -73,15 +80,19 @@ public class MessageDispatchHandler extends Thread {
                 LOGGER.log(Level.WARNING, ex.getMessage());
             }
         }
-        PRETTIER.print("System", "The identity of the other party has been authenticated.");
-        PRETTIER.print("System", "The secure session will be activated shortly.");
+        try {
+            PRETTIER.print("System", "The identity of " + client.getOtherAlias() + " has been authenticated.");
+        } catch (KeyStoreException ex) {
+            LOGGER.log(Level.WARNING, ex.getMessage());
+        }
+        PRETTIER.print("System", "The secure session will be activated now.");
 
         Object message = null;
         String input = "";
         do {
             BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
             try {
-                PRETTIER.print("System", "Enter the absolute path of an image to send.");
+                PRETTIER.print("System", "Enter the absolute path of an image to transfer.");
                 input = stdin.readLine();
 
                 if (input.equals("quit")) {
@@ -93,15 +104,15 @@ public class MessageDispatchHandler extends Thread {
                         PRETTIER.print("System", "The image cannot be located. Try again.");
                         path = Paths.get(stdin.readLine());
                     }
-                    PRETTIER.print("System", "Enter a caption for the image. ");
+                    PRETTIER.print("System", "Enter a caption for the image.");
                     String caption = stdin.readLine();
                     File file = path.toFile();
 
-                    //TODO: PGP Encryption
-                    message = new Message(encodeImageToBase64(file), caption);
+                    Message m = new Message(encodeImageToBase64(file), caption);
+                    message = encode(m);
                 }
 
-            } catch (IOException ex) {
+            } catch (IOException | KeyStoreException | InvalidAlgorithmParameterException | NoSuchPaddingException | IllegalBlockSizeException | NoSuchAlgorithmException | BadPaddingException | InvalidKeyException ex) {
                 LOGGER.log(Level.WARNING, ex.getMessage());
             }
 
@@ -112,5 +123,11 @@ public class MessageDispatchHandler extends Thread {
             }
 
         } while (!input.equals("quit"));
+    }
+
+    private byte[] encode(Message message) throws KeyStoreException, InvalidAlgorithmParameterException,
+            NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException,
+            BadPaddingException, InvalidKeyException {
+        return PGPUtils.PGPEncode(message, client.getPrivateKey(), client.getOtherPublicKey(), Client.LOGGER);
     }
 }

@@ -27,6 +27,7 @@ public class ClientHandler extends Thread {
     private final Socket socket;
     private final Server server;
     private ObjectOutputStream outputStream;
+    private String alias;
 
     /**
      * Class constructor specifying client socket and server instance
@@ -34,6 +35,7 @@ public class ClientHandler extends Thread {
     public ClientHandler(Socket socket, Server server) {
         this.socket = socket;
         this.server = server;
+        this.alias = "";
     }
 
     /**
@@ -54,7 +56,7 @@ public class ClientHandler extends Thread {
             ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream());
             outputStream = new ObjectOutputStream(socket.getOutputStream());
 
-            String alias = inputStream.readObject().toString();
+            alias = inputStream.readObject().toString();
             server.storeAlias(alias);
 
             X509Certificate certificate;
@@ -67,7 +69,7 @@ public class ClientHandler extends Thread {
 
             if (server.isSessionAlive()) {
                 if (!server.isSessionCertificateDelivered(alias)) {
-                    server.deliverCertificate(alias, this);
+                    server.deliverCertificate(this);
                 }
                 try {
                     Object message = inputStream.readObject();
@@ -97,12 +99,11 @@ public class ClientHandler extends Thread {
                             } catch (IOException | ClassNotFoundException ex) {
                                 LOGGER.log(Level.WARNING, ex.getMessage());
                             }
-                            if (message instanceof Message) {
-                                Message m = (Message) message;
-                                server.deliver(m, this);
+                            if (!(message instanceof CommandMessage)) {
+                                server.deliver(message, this);
                             }
 
-                        } while (message instanceof Message);
+                        } while (!(message instanceof CommandMessage));
 
 
                         server.disconnectClient(alias, this);
@@ -124,24 +125,16 @@ public class ClientHandler extends Thread {
     }
 
     /**
-     * Delivers a {@link Message} to a client by writing
+     * Delivers data to a client by writing
      * to the <code>OutputStream</code> attached to it's socket
      *
-     * @param message message to deliver to recipient
+     * @param obj data to deliver to recipient
      */
-    public void write(Message message) throws IOException {
-        outputStream.writeObject(message);
+    public void write(Object obj) throws IOException {
+        outputStream.writeObject(obj);
     }
 
-    //TODO
-
-    /**
-     * Delivers a {@link Message} to a client by writing
-     * to the <code>OutputStream</code> attached to it's socket
-     *
-     * @param certificate client certificate to deliver to recipient
-     */
-    public void write(Object certificate) throws IOException {
-        outputStream.writeObject(certificate);
+    public String getAlias() {
+        return alias;
     }
 }

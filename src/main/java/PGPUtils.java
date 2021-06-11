@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 import java.security.*;
 import java.util.Arrays;
+import java.util.logging.Logger;
 import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
@@ -193,19 +194,27 @@ public class PGPUtils {
      * @return <code>byte[]</code>
      */
     public static byte[] PGPEncode(final Message message, final PrivateKey senderKey, final PublicKey receiverKey,
-                                   final SecretKey sessionKey, final IvParameterSpec iv)
+                                   final Logger logger)
             throws NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException,
             InvalidKeyException, InvalidAlgorithmParameterException {
+        final SecretKey sessionKey = KeyUtils.generateSessionKey();
+        logger.info("Session key: " + sessionKey.getEncoded().toString());
+        logger.info("Session key algorithm: " + sessionKey.getAlgorithm());
+        final IvParameterSpec iv = KeyUtils.generateIV();
         final String messageConcat = message.toString();
         final byte[] captionLengthBytes = ByteBuffer.allocate(4).putInt(message.getCaption().length()).array();
         final byte[] messageBytes = concatBytes(captionLengthBytes, messageConcat.getBytes());
+        logger.info("Hashed message: " + SHA256Hash(messageConcat.getBytes()).toString());
         final byte[] signatureBytes = RSAEncryption(SHA256Hash(messageConcat.getBytes()), senderKey);
         final byte[] signedMessage = concatBytes(signatureBytes, messageBytes);
+        logger.info("Signed message length: " + signedMessage.length);
         final byte[] compressedSignedMessage = ZIPCompress(signedMessage);
+        logger.info("Compressed signed message length: " + compressedSignedMessage.length);
         final byte[] encryptedSignedMessage = AESEncryption(compressedSignedMessage, sessionKey, iv);
         final byte[] concatSessionData = concatBytes(iv.getIV(), sessionKey.getEncoded());
         final byte[] encryptedSessionData = RSAEncryption(concatSessionData, receiverKey);
         final byte[] pgpMessage = concatBytes(encryptedSessionData, encryptedSignedMessage);
+        logger.info("Encrypted message bytes: " + pgpMessage.toString());
         return pgpMessage;
     }
 
@@ -217,7 +226,8 @@ public class PGPUtils {
      * @param receiverKey public key of sender
      * @return <code>Message</code>
      */
-    public static Message PGPDecode(final byte[] pgpMessage, final PrivateKey receiverKey, final PublicKey senderKey)
+    public static Message PGPDecode(final byte[] pgpMessage, final PrivateKey receiverKey, final PublicKey senderKey,
+                                    final Logger logger)
             throws IllegalBlockSizeException, NoSuchPaddingException, NoSuchAlgorithmException, BadPaddingException,
             InvalidAlgorithmParameterException, DataFormatException, SignatureException, KeyException {
         // acquire encrypted session data
@@ -230,12 +240,16 @@ public class PGPUtils {
         // acquire aes session key
         final byte[] sessionKeyBytes = Arrays.copyOfRange(sessionData, 16, sessionData.length);
         final SecretKey sessionKey = new SecretKeySpec(sessionKeyBytes, 0, sessionKeyBytes.length, "AES");
+        logger.info("Session key: " + sessionKey.getEncoded().toString());
+        logger.info("Session key algorithm: " + sessionKey.getAlgorithm());
         // acquire encrypted compressed message
         final byte[] encryptedCompressedMessage = Arrays.copyOfRange(pgpMessage, RSAByteLength, pgpMessage.length);
         // decrypt compressed message
         final byte[] decryptedCompressedMessage = AESDecryption(encryptedCompressedMessage, sessionKey, iv);
         // decompress message
+        logger.info("Compressed message length: " + decryptedCompressedMessage.length);
         final byte[] decompressedMessage = ZIPDecompress(decryptedCompressedMessage);
+        logger.info("Decompressed message length: " + decompressedMessage.length);
         // acquire signature
         final byte[] signature = Arrays.copyOfRange(decompressedMessage, 0, RSAByteLength);
         // acquire caption length
@@ -250,6 +264,7 @@ public class PGPUtils {
         final String messageString = new String(messageBytes);
         // split message using the caption length into caption and picture strings and
         // return result
+        logger.info("Decrypted message caption: " + messageString.substring(0, captionLength));
         return new Message(messageString.substring(captionLength), messageString.substring(0, captionLength));
     }
 
