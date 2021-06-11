@@ -18,12 +18,34 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
+/**
+ * <code>CertificateGenerator</code> is a concrete class that generates {@link X509Certificate}
+ * certificates.
+ *
+ * @author Insaaf Dhansay
+ * @author Kialan Pillay
+ * @author Aidan Bailey
+ * @author Emily Morris
+ * @version %I%, %G%
+ */
 public class CertificateGenerator {
 
+    /**
+     * Sole class constructor
+     */
     private CertificateGenerator() {
 
     }
 
+    /**
+     * Generates a signed public key certificate using a <code>SHA256WithRSAEncryption</code>
+     * encryption algorithm.
+     *
+     * @param alias           alias of the certificate subject
+     * @param clientPublicKey public key of a client
+     * @param CAPrivateKey    private key of the Certificate Authority
+     * @return <code>X509Certificate</code>
+     */
     public static X509Certificate generate(String alias, PublicKey clientPublicKey, PrivateKey CAPrivateKey) {
 
         X500Name issuer = new X500Name("CN=CA");

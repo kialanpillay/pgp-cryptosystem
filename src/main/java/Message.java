@@ -54,5 +54,7 @@ public class Message implements Serializable {
         this.caption = caption;
     }
 
-    public String toString() { return caption + base64Image; }
+    public String toString() {
+        return caption + base64Image;
+    }
 }

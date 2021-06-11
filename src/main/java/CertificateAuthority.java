@@ -1,24 +1,31 @@
-import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.cert.X509CertificateHolder;
-import org.bouncycastle.cert.X509v3CertificateBuilder;
-import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
-import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.operator.ContentSigner;
-import org.bouncycastle.operator.OperatorCreationException;
-import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.math.BigInteger;
-import java.security.*;
+import java.security.KeyPair;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
 
+/**
+ * <code>CertificateAuthority</code> is a class that generates a {@link KeyPair}
+ * and stores the {@link KeyStore.Entry} in a PKCS12 {@link KeyStore} that is
+ * written to disk. Generation must occur in an offline step
+ * prior to <code>Client</code>s initiating a connection request to the server.
+ *
+ * @author Insaaf Dhansay
+ * @author Kialan Pillay
+ * @author Aidan Bailey
+ * @author Emily Morris
+ * @version %I%, %G%
+ * @see CertificateGenerator
+ * @see SecretsManager
+ */
 public class CertificateAuthority {
 
+    /**
+     * Generates a key pair for secure storage.
+     */
     public static void main(String[] args) throws Exception {
         KeyPair CAKeyPair = KeyUtils.generate();
         String filename = "keystore.pkcs12";
@@ -27,33 +34,18 @@ public class CertificateAuthority {
         store(filename, password, CAKeyPair);
     }
 
-    private static X509Certificate generateSelfSignedCertificate(KeyPair keyPair) {
-
-        X500Name issuer = new X500Name("cn=CA");
-        X500Name subject = new X500Name("cn=CA");
-        Date before = new Date();
-        Date after = new GregorianCalendar(2021, Calendar.DECEMBER, 31).getTime();
-        BigInteger sn = new BigInteger(64, new SecureRandom());
-
-        X509v3CertificateBuilder v3CertificateBuilder = new JcaX509v3CertificateBuilder(issuer, sn, before, after, subject, keyPair.getPublic());
-        X509Certificate certificate = null;
-        try {
-            ContentSigner signer = new JcaContentSignerBuilder("SHA256WithRSAEncryption").setProvider(new BouncyCastleProvider()).build(keyPair.getPrivate());
-            X509CertificateHolder certificateHolder = v3CertificateBuilder.build(signer);
-            certificate = new JcaX509CertificateConverter().setProvider(new BouncyCastleProvider()).getCertificate(certificateHolder);
-        } catch (CertificateException | OperatorCreationException e) {
-            e.printStackTrace();
-        }
-        return certificate;
-
-    }
-
+    /**
+     * Generates a self-signed certificate using its own Public-Private key pair.
+     * Loads PKCS12 keystore and sets an entry to store a private key
+     * with a trusted certificate. Writes the keystore to disk.
+     */
     private static void store(
             String filename, char[] password,
             KeyPair generatedKeyPair) throws KeyStoreException, IOException,
             NoSuchAlgorithmException, CertificateException {
 
-        X509Certificate rootCertificate = generateSelfSignedCertificate(generatedKeyPair);
+        X509Certificate rootCertificate = CertificateGenerator.generate("CA",
+                generatedKeyPair.getPublic(), generatedKeyPair.getPrivate());
 
         KeyStore keyStore = KeyStore.getInstance("PKCS12");
         keyStore.load(null, null);

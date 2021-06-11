@@ -7,7 +7,7 @@ import java.util.logging.Logger;
 
 /**
  * <code>CertificateHandler</code> is a concrete class that extends {@link Thread}.
- * A dedicated handler thread is spawned by the <code>Client</code> after accepting
+ * A dedicated handler thread is spawned by a <code>Client</code> after accepting
  * an initiating a connection request. A <code>CertificateHandler</code> is responsible
  * for receiving a signed certificate from another client.
  *
@@ -24,12 +24,19 @@ public class CertificateHandler extends Thread {
     private final Client client;
     private final ObjectInputStream inputStream;
 
+    /**
+     * Class constructor
+     */
     public CertificateHandler(Socket socket, ObjectInputStream inputStream, Client client) {
         this.socket = socket;
         this.client = client;
         this.inputStream = inputStream;
     }
 
+    /**
+     * Reads an object from the input stream and casts it to a
+     * <code>X509Certificate</code>.
+     */
     public void run() {
         try {
             X509Certificate certificate = (X509Certificate) inputStream.readObject();

@@ -25,7 +25,6 @@ import java.util.logging.Logger;
 public class Server {
 
     private static final Logger LOGGER = Logger.getLogger(Server.class.getName());
-    private static final Prettier PRETTIER = new Prettier();
     private final CommandMessageFactory COMMAND_MESSAGE_FACTORY = new CommandMessageFactory();
     private final int port;
     private final Set<ClientHandler> handlers = new HashSet<>();
@@ -49,7 +48,7 @@ public class Server {
      * Starts an instance of the server. If no port is specified
      * as an argument, a server is created using the default port.
      *
-     * @param args   command line parameters
+     * @param args command line parameters
      */
     public static void main(String[] args) {
         Server server = args.length > 1 ? new Server(Integer.parseInt(args[0])) : new Server();
@@ -87,8 +86,8 @@ public class Server {
      * Delivers a {@link Message} to the other connected clients
      * using the dedicated handlers
      *
-     * @param message   message to deliver to client
-     * @param source   handler that manages communication with the source client
+     * @param message message to deliver to client
+     * @param source  handler that manages communication with the source client
      */
     public void deliver(Message message, ClientHandler source) throws IOException {
         for (ClientHandler handler : handlers) {
@@ -102,7 +101,7 @@ public class Server {
      * Delivers a {@link CommandMessage} to all connected clients.
      * Typically used to disconnect all clients.
      *
-     * @param message   command message to broadcast
+     * @param message command message to broadcast
      */
     public void broadcast(CommandMessage message) throws IOException {
         for (ClientHandler handler : handlers) {
@@ -115,7 +114,7 @@ public class Server {
      * using the dedicated handlers
      *
      * @param alias  alias of client attached to the certificate
-     * @param source    handler that manages communication with the source client
+     * @param source handler that manages communication with the source client
      */
     public void deliverCertificate(String alias, ClientHandler source) throws IOException, KeyStoreException {
         for (ClientHandler handler : handlers) {
@@ -142,9 +141,9 @@ public class Server {
      * If two clients have connected, a session is initiated
      *
      * @param certificate signed certificate containing client public key
-     * @param alias    client alias
+     * @param alias       client alias
      */
-    public void storeCertificate(X509Certificate certificate, String alias){
+    public void storeCertificate(X509Certificate certificate, String alias) {
         try {
             session.storeCertificate(certificate, alias);
         } catch (Exception ex) {
@@ -161,8 +160,8 @@ public class Server {
      * Removes the associated handler and broadcasts a {@link QuitMessage}
      * to all client to force graceful disconnection
      *
-     * @param alias alias of client to disconnect
-     * @param handler  handler that manages communication with the specified client
+     * @param alias   alias of client to disconnect
+     * @param handler handler that manages communication with the specified client
      */
     public void disconnectClient(String alias, ClientHandler handler) {
         boolean disconnect = false;

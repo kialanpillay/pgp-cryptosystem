@@ -1,10 +1,9 @@
+import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-
-import javax.crypto.SecretKey;
-import javax.crypto.spec.IvParameterSpec;
 
 /**
  * <code>KeyUtils</code> is a concrete wrapper class that generates key-pairs

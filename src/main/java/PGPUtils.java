@@ -1,26 +1,13 @@
+import javax.crypto.*;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.Key;
-import java.security.KeyException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.SignatureException;
+import java.security.*;
 import java.util.Arrays;
 import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
 
 /**
  * <code>PGPUtils</code> is a concrete wrapper class that provides Pretty Good
@@ -123,7 +110,7 @@ public class PGPUtils {
      * {@link Cipher}.
      *
      * @param encryptedMessageBytes bytes of message to be decrypted
-     * @param key          specified RSA key
+     * @param key                   specified RSA key
      * @return <code>byte[]</code>
      */
     private static byte[] RSADecryption(final byte[] encryptedMessageBytes, final Key key) throws InvalidKeyException,
@@ -155,8 +142,8 @@ public class PGPUtils {
      * vector using the {@link Cipher}.
      *
      * @param encryptedMessageBytes bytes of message to be decrypted
-     * @param key          specified AES key
-     * @param iv           initialization vector
+     * @param key                   specified AES key
+     * @param iv                    initialization vector
      * @return <code>byte[]</code>
      */
     private static byte[] AESDecryption(final byte[] encryptedMessageBytes, final Key key, final IvParameterSpec iv)
@@ -206,7 +193,7 @@ public class PGPUtils {
      * @return <code>byte[]</code>
      */
     public static byte[] PGPEncode(final Message message, final PrivateKey senderKey, final PublicKey receiverKey,
-            final SecretKey sessionKey, final IvParameterSpec iv)
+                                   final SecretKey sessionKey, final IvParameterSpec iv)
             throws NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException,
             InvalidKeyException, InvalidAlgorithmParameterException {
         final String messageConcat = message.toString();
@@ -233,7 +220,7 @@ public class PGPUtils {
     public static Message PGPDecode(final byte[] pgpMessage, final PrivateKey receiverKey, final PublicKey senderKey)
             throws IllegalBlockSizeException, NoSuchPaddingException, NoSuchAlgorithmException, BadPaddingException,
             InvalidAlgorithmParameterException, DataFormatException, SignatureException, KeyException {
-        // aquire encrypted session data
+        // acquire encrypted session data
         final byte[] encryptedSessionData = Arrays.copyOfRange(pgpMessage, 0, RSAByteLength);
         // decrypt session data
         final byte[] sessionData = RSADecryption(encryptedSessionData, receiverKey);

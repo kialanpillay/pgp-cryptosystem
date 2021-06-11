@@ -50,23 +50,6 @@ public class Client {
     }
 
     /**
-     * Initialises a PKCS12 keystore for in-memory storage
-     * of secrets
-     */
-    private void loadKeyStore() {
-        try {
-            this.keyStore = KeyStore.getInstance("PKCS12");
-        } catch (KeyStoreException e) {
-            e.printStackTrace();
-        }
-        try {
-            this.keyStore.load(null, null);
-        } catch (IOException | NoSuchAlgorithmException | CertificateException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
      * Starts a client instance using the specified hostname and port.
      * If no hostname or port is specified the operation is aborted.
      * Retrieves the client's alias and output directory from the console
@@ -116,6 +99,23 @@ public class Client {
         client.setPath(path);
         client.getCASignedCertificate();
         client.connect();
+    }
+
+    /**
+     * Initialises a PKCS12 keystore for in-memory storage
+     * of secrets
+     */
+    private void loadKeyStore() {
+        try {
+            this.keyStore = KeyStore.getInstance("PKCS12");
+        } catch (KeyStoreException e) {
+            e.printStackTrace();
+        }
+        try {
+            this.keyStore.load(null, null);
+        } catch (IOException | NoSuchAlgorithmException | CertificateException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -192,10 +192,10 @@ public class Client {
 
     /**
      * Verifies the authenticity of a client using it's certificate.
-     * The certificate is verified using the public key
+     * Verification uses the public key
      * of the trusted Certificate Authority.
-     * If the certificate is unverified a <code>InvalidKeyException</code>
-     * is thrown.
+     * Unverified certificates throw an <code>InvalidKeyException</code>
+     * exception
      */
     public void verifyOtherCertificate() {
         try {

@@ -135,7 +135,7 @@ public class Session {
      * @param certificate signed certificate containing client public key
      * @param alias       client alias
      */
-    public void storeCertificate(X509Certificate certificate, String alias){
+    public void storeCertificate(X509Certificate certificate, String alias) {
         try {
             keyStore.setCertificateEntry(alias, certificate);
         } catch (KeyStoreException e) {
@@ -178,7 +178,7 @@ public class Session {
      * @return <code>boolean</code> returns <code>True</code> if client is successfully disconnected
      * <code>False</code> otherwise
      */
-    public boolean disconnectClient(String alias){
+    public boolean disconnectClient(String alias) {
         boolean disconnect = aliases.remove(alias);
         if (disconnect) {
             try {

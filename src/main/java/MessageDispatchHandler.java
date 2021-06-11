@@ -7,6 +7,19 @@ import java.util.Base64;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * <code>MessageDispatchHandler</code> is a concrete class that extends {@link Thread}.
+ * A dedicated handler thread is spawned by a <code>Client</code> after initiating a connection request.
+ * A <code>MessageDispatchHandler</code> is responsible
+ * for dispatching encrypted messages to the <code>Server</code> after a communication session has been
+ * activated.
+ *
+ * @author Kialan Pillay
+ * @author Aidan Bailey
+ * @author Insaaf Dhansay
+ * @author Emily Morris
+ * @version %I%, %G%
+ */
 public class MessageDispatchHandler extends Thread {
 
     private static final Logger LOGGER = Logger.getLogger(MessageDispatchHandler.class.getName());
@@ -16,12 +29,21 @@ public class MessageDispatchHandler extends Thread {
     private final CommandMessageFactory commandMessageFactory = new CommandMessageFactory();
     private final ObjectOutputStream outputStream;
 
+    /**
+     * Sole class constructor
+     */
     public MessageDispatchHandler(Socket socket, ObjectOutputStream outputStream, Client client) {
         this.socket = socket;
         this.client = client;
         this.outputStream = outputStream;
     }
 
+    /**
+     * Converts an image file to <code>Base64</code> encoded string
+     *
+     * @param file image to encode
+     * @returns <code>String</code>
+     */
     public static String encodeImageToBase64(File file) {
         String base64Image = null;
         try {
@@ -36,6 +58,13 @@ public class MessageDispatchHandler extends Thread {
         return base64Image;
     }
 
+    /**
+     * Reads in input from the console after the thread is unblocked
+     * and continuously writes encrypted messages to the socket output stream.
+     * Writes a {@link QuitMessage} to the output stream if the client requests to disconnect
+     *
+     * @see PGPUtils
+     */
     public void run() {
         while (!client.isOtherKeyAuthenticated()) {
             try {

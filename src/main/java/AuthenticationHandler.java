@@ -8,18 +8,18 @@ import java.util.logging.Logger;
 
 /**
  * <code>AuthenticationHandler</code> is a concrete class that extends {@link Thread}.
- * A dedicated handler thread is spawned by the <code>Client</code> after accepting
+ * A dedicated handler thread is spawned by a <code>Client</code> after accepting
  * an initiating a connection request. A <code>AuthenticationHandler</code> is responsible
  * for sending the alias and certificate of the client to the server. Once the certificates
  * have been exchanged and verified, the handler dispatches a {@link AuthenticateMessage}
  * to the <code>Server</code>. Once both clients have authenticated, the session is activated.
  *
- * @see CertificateHandler
  * @author Kialan Pillay
  * @author Aidan Bailey
  * @author Insaaf Dhansay
  * @author Emily Morris
  * @version %I%, %G%
+ * @see CertificateHandler
  */
 public class AuthenticationHandler extends Thread {
 
@@ -27,14 +27,23 @@ public class AuthenticationHandler extends Thread {
     private final Socket socket;
     private final Client client;
     private final CommandMessageFactory commandMessageFactory = new CommandMessageFactory();
-    private ObjectOutputStream outputStream;
+    private final ObjectOutputStream outputStream;
 
+    /**
+     * Class constructor
+     */
     public AuthenticationHandler(Socket socket, ObjectOutputStream outputStream, Client client) {
         this.socket = socket;
         this.client = client;
         this.outputStream = outputStream;
     }
 
+    /**
+     * Writes the client alias and signed public key certificate
+     * to the socket's output stream. The thread is paused until certificates
+     * are exchange and is verified by a client. Sends an {@link AuthenticateMessage}
+     * to the server.
+     */
     public void run() {
 
         try {

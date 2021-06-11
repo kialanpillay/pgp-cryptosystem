@@ -44,10 +44,10 @@ public class ClientHandler extends Thread {
      * yet to be delivered, the handler sends a request to the server.
      * Once an {@link AuthenticateMessage} is received from the client, it
      * authenticates the client in the session.
-     * Once a session is activated, the handler continuously retrieves
+     * Once a session is activated, continuously retrieves
      * messages from the client and passes them to the server for delivery
-     * to the destination. If a {@link QuitMessage} is received, the client is
-     * disconnected and the socket is closed.
+     * to the destination. Disconnects the client and closes the socket
+     * if a {@link QuitMessage} is received.
      */
     public void run() {
         try {
@@ -58,7 +58,7 @@ public class ClientHandler extends Thread {
             server.storeAlias(alias);
 
             X509Certificate certificate;
-            certificate = (X509Certificate)inputStream.readObject();
+            certificate = (X509Certificate) inputStream.readObject();
             server.storeCertificate(certificate, alias);
 
             while (!server.isSessionAlive()) {
