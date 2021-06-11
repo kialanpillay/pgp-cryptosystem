@@ -25,7 +25,7 @@ import java.util.logging.Logger;
  */
 public class Client {
 
-    private static final Logger LOGGER = Logger.getLogger(Client.class.getName());
+    public static final Logger LOGGER = Logger.getLogger(Client.class.getName());
     private static final Prettier PRETTIER = new Prettier();
     private static final SecretsManager SECRETS_MANAGER = new SecretsManager();
     private final String hostname;
@@ -175,10 +175,6 @@ public class Client {
         return (X509Certificate) keyStore.getCertificate(alias);
     }
 
-    public static Logger getLogger() {
-        return LOGGER;
-    }
-
     public PrivateKey getPrivateKey() {
         return keyPair.getPrivate();
     }
@@ -187,8 +183,8 @@ public class Client {
         return keyStore.getCertificate("other").getPublicKey();
     }
 
-    public String getOtherAlias() throws KeyStoreException{
-        X509Certificate certificate = (X509Certificate)keyStore.getCertificate("other");
+    public String getOtherAlias() throws KeyStoreException {
+        X509Certificate certificate = (X509Certificate) keyStore.getCertificate("other");
         return certificate.getSubjectDN().getName().substring(3);
     }
 

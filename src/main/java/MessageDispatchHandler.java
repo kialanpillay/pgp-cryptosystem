@@ -128,6 +128,6 @@ public class MessageDispatchHandler extends Thread {
     private byte[] encode(Message message) throws KeyStoreException, InvalidAlgorithmParameterException,
             NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException,
             BadPaddingException, InvalidKeyException {
-        return PGPUtils.PGPEncode(message, client.getPrivateKey(), client.getOtherPublicKey());
+        return PGPUtils.PGPEncode(message, client.getPrivateKey(), client.getOtherPublicKey(), Client.LOGGER);
     }
 }

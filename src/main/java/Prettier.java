@@ -39,14 +39,16 @@ public class Prettier {
      */
     public void print(String identity, String message) {
         StringBuilder stringBuilder = new StringBuilder();
-        System.out.println(stringBuilder
-                .append(sdf.format(new Date()))
+        stringBuilder.append(sdf.format(new Date()))
                 .append(" ")
                 .append("[")
                 .append(identity.toUpperCase())
-                .append("]")
-                .append(" - ")
-                .append(message.toLowerCase()));
+                .append("]");
+        for (int i = 0; i < 7 - identity.length(); i++){
+            stringBuilder.append(" ");
+        }
+        stringBuilder.append("- ").append(message.toLowerCase()).toString();
+        System.out.println(stringBuilder);
     }
 
     /**
@@ -58,13 +60,16 @@ public class Prettier {
      */
     public String toString(String identity, String message) {
         StringBuilder stringBuilder = new StringBuilder();
-        return stringBuilder
-                .append(sdf.format(new Date()))
+        stringBuilder.append(sdf.format(new Date()))
                 .append(" ")
                 .append("[")
                 .append(identity.toUpperCase())
-                .append("]")
-                .append(" - ")
+                .append("]");
+        for (int i = 0; i < 6 - identity.length(); i++){
+            stringBuilder.append(" ");
+        }
+        return stringBuilder
+                .append("- ")
                 .append(message.toLowerCase()).toString();
     }
 }

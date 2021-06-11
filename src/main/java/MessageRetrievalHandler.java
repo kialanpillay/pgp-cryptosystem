@@ -92,6 +92,6 @@ public class MessageRetrievalHandler extends Thread {
     private Message decode(byte[] pgpMessage) throws KeyStoreException, InvalidAlgorithmParameterException,
             NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException,
             BadPaddingException, KeyException, DataFormatException, SignatureException {
-        return PGPUtils.PGPDecode(pgpMessage, client.getPrivateKey(), client.getOtherPublicKey());
+        return PGPUtils.PGPDecode(pgpMessage, client.getPrivateKey(), client.getOtherPublicKey(), Client.LOGGER);
     }
 }
