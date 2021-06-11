@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * <code>Server</code> is a concrete class that controls and manages communication
@@ -48,7 +49,7 @@ public class Server {
      * Starts an instance of the server. If no port is specified
      * as an argument, a server is created using the default port.
      *
-     * @param args command line parameters
+     * @param args command line arguments
      */
     public static void main(String[] args) {
         Server server = args.length > 1 ? new Server(Integer.parseInt(args[0])) : new Server();
@@ -83,16 +84,17 @@ public class Server {
     }
 
     /**
-     * Delivers a {@link Message} to the other connected clients
-     * using the dedicated handlers
+     * Delivers an encrypted message to the other connected client
+     * using the dedicated handler
      *
      * @param message message to deliver to client
      * @param source  handler that manages communication with the source client
      */
-    public void deliver(Message message, ClientHandler source) throws IOException {
+    public void deliver(Object message, ClientHandler source) throws IOException {
         for (ClientHandler handler : handlers) {
             if (handler != source) {
                 handler.write(message);
+                LOGGER.info("Delivered encrypted message to client " + getRecipientAlias(source.getAlias()));
             }
         }
     }
@@ -106,22 +108,22 @@ public class Server {
     public void broadcast(CommandMessage message) throws IOException {
         for (ClientHandler handler : handlers) {
             handler.write(message);
+            LOGGER.info("Broadcast message to all connected clients");
         }
     }
 
     /**
-     * Delivers a certificate to other connected clients
-     * using the dedicated handlers
+     * Delivers a signed certificate to the connected client
+     * using the dedicated handler
      *
-     * @param alias  alias of client attached to the certificate
      * @param source handler that manages communication with the source client
      */
-    public void deliverCertificate(String alias, ClientHandler source) throws IOException, KeyStoreException {
+    public void deliverCertificate(ClientHandler source) throws IOException, KeyStoreException {
         for (ClientHandler handler : handlers) {
             if (handler != source) {
-                handler.write(session.getCertificate(alias));
-                LOGGER.info("Delivered X.509 certificate from client " + alias);
-                session.log(alias);
+                handler.write(session.getCertificate(source.getAlias()));
+                LOGGER.info("Delivered X.509 certificate to client " + getRecipientAlias(source.getAlias()) + " from client " + source.getAlias());
+                session.log(source.getAlias());
             }
         }
     }
@@ -133,7 +135,18 @@ public class Server {
      */
     public void storeAlias(String alias) {
         session.storeAlias(alias);
+        LOGGER.info("Client " + alias + " has connected to the server");
         LOGGER.info("Connected clients " + session.getAliases());
+    }
+
+    /**
+     * Retrieves alias of recipient client
+     *
+     * @param alias source client alias
+     * @return <code>String</code>
+     */
+    public String getRecipientAlias(String alias) {
+        return session.getAliases().stream().filter(a -> !a.equals(alias)).collect(Collectors.toList()).get(0);
     }
 
     /**

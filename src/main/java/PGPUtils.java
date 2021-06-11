@@ -192,10 +192,11 @@ public class PGPUtils {
      * @param receiverKey public key of receiver
      * @return <code>byte[]</code>
      */
-    public static byte[] PGPEncode(final Message message, final PrivateKey senderKey, final PublicKey receiverKey,
-                                   final SecretKey sessionKey, final IvParameterSpec iv)
+    public static byte[] PGPEncode(final Message message, final PrivateKey senderKey, final PublicKey receiverKey)
             throws NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException,
             InvalidKeyException, InvalidAlgorithmParameterException {
+        final SecretKey sessionKey = KeyUtils.generateSessionKey();
+        final IvParameterSpec iv = KeyUtils.generateIV();
         final String messageConcat = message.toString();
         final byte[] captionLengthBytes = ByteBuffer.allocate(4).putInt(message.getCaption().length()).array();
         final byte[] messageBytes = concatBytes(captionLengthBytes, messageConcat.getBytes());

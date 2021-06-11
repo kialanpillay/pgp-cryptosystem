@@ -1,12 +1,17 @@
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.security.*;
 import java.util.Base64;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.zip.DataFormatException;
 
 /**
  * <code>MessageRetrievalHandler</code> is a concrete class that extends {@link Thread}.
@@ -55,11 +60,13 @@ public class MessageRetrievalHandler extends Thread {
 
         while (true) {
             try {
-                //TODO: PGP Decryption
                 Object message = inputStream.readObject();
 
-                if (message instanceof Message) {
-                    Message m = (Message) message;
+                if (message instanceof CommandMessage) {
+                    CommandMessage m = (CommandMessage) message;
+                    PRETTIER.print("System", m.getMessage());
+                } else if (message != null) {
+                    Message m = decode((byte[]) message);
                     byte[] data = Base64.getDecoder().decode(m.getBase64Image());
 
                     StringBuilder stringBuilder = new StringBuilder(client.getPath());
@@ -70,18 +77,21 @@ public class MessageRetrievalHandler extends Thread {
                     } catch (IOException ex) {
                         LOGGER.log(Level.WARNING, ex.getMessage());
                     }
-                    PRETTIER.print("Client", m.getCaption());
-                    PRETTIER.print("System", "Enter the absolute path of an image to send.");
+                    PRETTIER.print(client.getOtherAlias(), m.getCaption());
+                    PRETTIER.print("System", "Decrypted image has been saved to disk.");
                 }
 
-                if (message instanceof QuitMessage) {
-                    QuitMessage m = (QuitMessage) message;
-                    PRETTIER.print("System", m.getMessage());
-                }
-
-            } catch (IOException | ClassNotFoundException ex) {
+            } catch (IOException | ClassNotFoundException | KeyStoreException | InvalidAlgorithmParameterException
+                    | DataFormatException | NoSuchPaddingException | IllegalBlockSizeException
+                    | NoSuchAlgorithmException | BadPaddingException | SignatureException | KeyException ex) {
                 client.kill();
             }
         }
+    }
+
+    private Message decode(byte[] pgpMessage) throws KeyStoreException, InvalidAlgorithmParameterException,
+            NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException,
+            BadPaddingException, KeyException, DataFormatException, SignatureException {
+        return PGPUtils.PGPDecode(pgpMessage, client.getPrivateKey(), client.getOtherPublicKey());
     }
 }

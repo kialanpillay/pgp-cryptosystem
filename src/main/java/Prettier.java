@@ -1,5 +1,6 @@
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * <code>Prettier</code> is a concrete class that generates formatted output for clients.
@@ -45,7 +46,7 @@ public class Prettier {
                 .append(identity.toUpperCase())
                 .append("]")
                 .append(" - ")
-                .append(message.toUpperCase()));
+                .append(message.toLowerCase()));
     }
 
     /**
@@ -64,6 +65,6 @@ public class Prettier {
                 .append(identity.toUpperCase())
                 .append("]")
                 .append(" - ")
-                .append(message.toUpperCase()).toString();
+                .append(message.toLowerCase()).toString();
     }
 }

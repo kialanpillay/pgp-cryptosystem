@@ -55,7 +55,7 @@ public class Client {
      * Retrieves the client's alias and output directory from the console
      * and initiates a connection request to the server.
      *
-     * @param args command line parameters
+     * @param args command line arguments
      */
     public static void main(String[] args) throws NoSuchAlgorithmException {
         String hostname = "localhost";
@@ -75,14 +75,14 @@ public class Client {
         BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
 
         PRETTIER.print("System", "Welcome to CryptoSystem. Safe. Secure. Communication.");
-        PRETTIER.print("System", "Alias?");
+        PRETTIER.print("System", "Enter an alias for your device.");
         try {
             alias = stdin.readLine();
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        PRETTIER.print("System", "Directory?");
+        PRETTIER.print("System", "Enter the absolute path of a directory to store decrypted images.");
         try {
             path = stdin.readLine();
             while (!Files.isDirectory(Paths.get(path))) {
@@ -175,6 +175,23 @@ public class Client {
         return (X509Certificate) keyStore.getCertificate(alias);
     }
 
+    public static Logger getLogger() {
+        return LOGGER;
+    }
+
+    public PrivateKey getPrivateKey() {
+        return keyPair.getPrivate();
+    }
+
+    public PublicKey getOtherPublicKey() throws KeyStoreException {
+        return keyStore.getCertificate("other").getPublicKey();
+    }
+
+    public String getOtherAlias() throws KeyStoreException{
+        X509Certificate certificate = (X509Certificate)keyStore.getCertificate("other");
+        return certificate.getSubjectDN().getName().substring(3);
+    }
+
     /**
      * Stores a certificate from a connected client
      * in the in-memory key store and initiates verification.
@@ -210,10 +227,6 @@ public class Client {
 
     public boolean isOtherKeyAuthenticated() {
         return otherKeyAuthenticated;
-    }
-
-    public void debug(String message) {
-        LOGGER.info(message);
     }
 
     /**
