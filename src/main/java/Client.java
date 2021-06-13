@@ -108,13 +108,13 @@ public class Client {
     private void loadKeyStore() {
         try {
             this.keyStore = KeyStore.getInstance("PKCS12");
-        } catch (KeyStoreException e) {
-            e.printStackTrace();
+        } catch (KeyStoreException ex) {
+            LOGGER.warning(ex.getMessage());
         }
         try {
             this.keyStore.load(null, null);
-        } catch (IOException | NoSuchAlgorithmException | CertificateException e) {
-            e.printStackTrace();
+        } catch (IOException | NoSuchAlgorithmException | CertificateException ex) {
+            LOGGER.warning(ex.getMessage());
         }
     }
 
@@ -127,8 +127,8 @@ public class Client {
         X509Certificate certificate = SECRETS_MANAGER.generateCertificate(this.alias, this.keyPair.getPublic());
         try {
             keyStore.setCertificateEntry(alias, certificate);
-        } catch (KeyStoreException e) {
-            e.printStackTrace();
+        } catch (KeyStoreException ex) {
+            LOGGER.warning(ex.getMessage());
         }
     }
 
@@ -151,6 +151,7 @@ public class Client {
 
         } catch (IOException ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
+            kill();
         }
 
     }
@@ -197,8 +198,8 @@ public class Client {
     public void storeOtherCertificate(X509Certificate otherCertificate) {
         try {
             keyStore.setCertificateEntry("other", otherCertificate);
-        } catch (KeyStoreException e) {
-            e.printStackTrace();
+        } catch (KeyStoreException ex) {
+            LOGGER.warning(ex.getMessage());
         }
         verifyOtherCertificate();
     }
