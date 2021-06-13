@@ -258,9 +258,11 @@ public class PGPUtils {
         // acquire message
         final byte[] messageBytes = Arrays.copyOfRange(decompressedMessage, RSAByteLength + 4,
                 decompressedMessage.length);
+        logger.info("Hashed message: " + SHA256Hash(messageBytes).toString());
         if (!validateSignature(signature, messageBytes, senderKey)) {
             throw new SignatureException("Invalid signature for given message");
         }
+        logger.info("Message signature validated");
         final String messageString = new String(messageBytes);
         // split message using the caption length into caption and picture strings and
         // return result
