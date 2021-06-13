@@ -79,7 +79,7 @@ public class Server {
 
         } catch (IOException | KeyStoreException ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
-            ex.printStackTrace();
+            kill();
         }
     }
 
@@ -187,7 +187,7 @@ public class Server {
             handlers.remove(handler);
             LOGGER.info("Client " + alias + " has disconnected");
             try {
-                String message = alias + " has left the matrix.";
+                String message = alias + " has left the matrix";
                 CommandMessage quitMessage = COMMAND_MESSAGE_FACTORY.getCommandMessage("QUIT", message);
                 broadcast(quitMessage);
             } catch (IOException ex) {

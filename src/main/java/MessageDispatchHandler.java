@@ -81,18 +81,18 @@ public class MessageDispatchHandler extends Thread {
             }
         }
         try {
-            PRETTIER.print("System", "The identity of " + client.getOtherAlias() + " has been authenticated.");
+            PRETTIER.print("System", "The identity of " + client.getOtherAlias() + " has been authenticated");
         } catch (KeyStoreException ex) {
             LOGGER.log(Level.WARNING, ex.getMessage());
         }
-        PRETTIER.print("System", "The secure session will be activated now.");
+        PRETTIER.print("System", "The secure session will be activated now");
 
         Object message = null;
         String input = "";
         do {
             BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
             try {
-                PRETTIER.print("System", "Enter the absolute path of an image to transfer.");
+                PRETTIER.print("System", "Enter the absolute path of an image or 'quit'");
                 input = stdin.readLine();
 
                 if (input.equals("quit")) {
@@ -101,10 +101,10 @@ public class MessageDispatchHandler extends Thread {
                     Path path = Paths.get(input);
 
                     while (Files.notExists(path)) {
-                        PRETTIER.print("System", "The image cannot be located. Try again.");
+                        PRETTIER.print("System", "The image cannot be located. Try again");
                         path = Paths.get(stdin.readLine());
                     }
-                    PRETTIER.print("System", "Enter a caption for the image.");
+                    PRETTIER.print("System", "Enter a caption for the image");
                     String caption = stdin.readLine();
                     File file = path.toFile();
 

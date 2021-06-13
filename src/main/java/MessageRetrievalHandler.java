@@ -78,7 +78,7 @@ public class MessageRetrievalHandler extends Thread {
                         LOGGER.log(Level.WARNING, ex.getMessage());
                     }
                     PRETTIER.print(client.getOtherAlias(), m.getCaption());
-                    PRETTIER.print("System", "Decrypted image has been saved to disk.");
+                    PRETTIER.print("System", "Decrypted image has been saved to disk");
                 }
 
             } catch (IOException | ClassNotFoundException | KeyStoreException | InvalidAlgorithmParameterException

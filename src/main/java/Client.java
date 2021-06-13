@@ -74,19 +74,19 @@ public class Client {
         String path = "";
         BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
 
-        PRETTIER.print("System", "Welcome to CryptoSystem. Safe. Secure. Communication.");
-        PRETTIER.print("System", "Enter an alias for your device.");
+        PRETTIER.print("System", "Welcome to CryptoSystem");
+        PRETTIER.print("System", "Enter an alias for your device");
         try {
             alias = stdin.readLine();
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        PRETTIER.print("System", "Enter the absolute path of a directory to store decrypted images.");
+        PRETTIER.print("System", "Enter an absolute directory path to store decrypted images");
         try {
             path = stdin.readLine();
             while (!Files.isDirectory(Paths.get(path))) {
-                PRETTIER.print("System", "This is not a valid directory. Try again.");
+                PRETTIER.print("System", "This is not a valid directory. Try again");
                 path = stdin.readLine();
             }
         } catch (IOException e) {
@@ -215,9 +215,12 @@ public class Client {
             this.keyStore.getCertificate("other").verify(CAPublicKey);
             this.otherKeyAuthenticated = true;
 
-        } catch (CertificateException | NoSuchAlgorithmException | InvalidKeyException | NoSuchProviderException | SignatureException | KeyStoreException e) {
-            e.printStackTrace();
-            this.otherKeyAuthenticated = false;
+        } catch (InvalidKeyException ex) {
+            LOGGER.warning("Certificate cannot be verified");
+            kill();
+        }
+        catch (CertificateException | NoSuchAlgorithmException | NoSuchProviderException | SignatureException | KeyStoreException ex) {
+            LOGGER.warning(ex.getMessage());
         }
     }
 
@@ -229,7 +232,7 @@ public class Client {
      * Terminates a running instance of the {@link Client}
      */
     public void kill() {
-        PRETTIER.print("System", "You are being disconnected from CryptoSystem.");
+        PRETTIER.print("System", "You are being disconnected from CryptoSystem");
         System.exit(0);
     }
 }

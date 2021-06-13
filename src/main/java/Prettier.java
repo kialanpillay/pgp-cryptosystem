@@ -47,7 +47,7 @@ public class Prettier {
         for (int i = 0; i < 7 - identity.length(); i++){
             stringBuilder.append(" ");
         }
-        stringBuilder.append("- ").append(message.toLowerCase()).toString();
+        stringBuilder.append("- ").append(message).toString();
         System.out.println(stringBuilder);
     }
 

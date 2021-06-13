@@ -172,7 +172,7 @@ public class Session {
     }
 
     /**
-     * Removes a client and associated from internal state
+     * Removes a client and associated data from internal state.
      *
      * @param alias alias of client to disconnect
      * @return <code>boolean</code> returns <code>True</code> if client is successfully disconnected

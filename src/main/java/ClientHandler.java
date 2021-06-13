@@ -83,6 +83,7 @@ public class ClientHandler extends Thread {
                     }
 
                 } catch (IOException | ClassNotFoundException ex) {
+                    LOGGER.log(Level.SEVERE, ex.getMessage());
                     server.kill();
                 }
             }
@@ -97,7 +98,8 @@ public class ClientHandler extends Thread {
                             try {
                                 message = inputStream.readObject();
                             } catch (IOException | ClassNotFoundException ex) {
-                                LOGGER.log(Level.WARNING, ex.getMessage());
+                                LOGGER.log(Level.SEVERE, ex.getMessage());
+                                server.kill();
                             }
                             if (!(message instanceof CommandMessage)) {
                                 server.deliver(message, this);
@@ -110,6 +112,7 @@ public class ClientHandler extends Thread {
                         socket.close();
 
                     } catch (IOException ex) {
+                        LOGGER.log(Level.SEVERE, ex.getMessage());
                         server.kill();
                     }
                 } else {
@@ -117,7 +120,7 @@ public class ClientHandler extends Thread {
                 }
             }
         } catch (IOException | ClassNotFoundException | InterruptedException | KeyStoreException ex) {
-            LOGGER.log(Level.WARNING, ex.getMessage());
+            LOGGER.log(Level.SEVERE, ex.getMessage());
             server.kill();
         }
 
