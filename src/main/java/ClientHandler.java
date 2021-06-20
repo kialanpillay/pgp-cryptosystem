@@ -119,9 +119,12 @@ public class ClientHandler extends Thread {
                     Thread.sleep(100);
                 }
             }
-        } catch (IOException | ClassNotFoundException | InterruptedException | KeyStoreException ex) {
+        } catch (IOException | ClassNotFoundException | InterruptedException ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
             server.kill();
+        }
+        catch (KeyStoreException ex) {
+            LOGGER.log(Level.SEVERE, ex.getMessage());
         }
 
 

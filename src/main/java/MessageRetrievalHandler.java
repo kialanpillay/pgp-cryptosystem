@@ -71,7 +71,7 @@ public class MessageRetrievalHandler extends Thread {
 
                     StringBuilder stringBuilder = new StringBuilder(client.getPath());
                     try (OutputStream stream = new FileOutputStream(stringBuilder.
-                            append(ThreadLocalRandom.current().nextInt()).
+                            append(Math.abs(ThreadLocalRandom.current().nextInt())).
                             append(".png").toString())) {
                         stream.write(data);
                     } catch (IOException ex) {
@@ -81,10 +81,12 @@ public class MessageRetrievalHandler extends Thread {
                     PRETTIER.print("System", "Decrypted image has been saved to disk");
                 }
 
-            } catch (IOException | ClassNotFoundException | KeyStoreException | InvalidAlgorithmParameterException
+            } catch (IOException ex) {
+                client.kill();
+            } catch (ClassNotFoundException | KeyStoreException | InvalidAlgorithmParameterException
                     | DataFormatException | NoSuchPaddingException | IllegalBlockSizeException
                     | NoSuchAlgorithmException | BadPaddingException | SignatureException | KeyException ex) {
-                client.kill();
+                LOGGER.log(Level.WARNING, ex.getMessage());
             }
         }
     }

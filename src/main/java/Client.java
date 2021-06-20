@@ -78,8 +78,8 @@ public class Client {
         PRETTIER.print("System", "Enter an alias for your device");
         try {
             alias = stdin.readLine();
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException ex) {
+            LOGGER.warning(ex.getMessage());
         }
 
         PRETTIER.print("System", "Enter an absolute directory path to store decrypted images");
@@ -89,8 +89,8 @@ public class Client {
                 PRETTIER.print("System", "This is not a valid directory. Try again");
                 path = stdin.readLine();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException ex) {
+            LOGGER.warning(ex.getMessage());
         }
 
         PRETTIER.print("System", "Please wait until a secure session is established.");
@@ -217,7 +217,7 @@ public class Client {
             this.otherKeyAuthenticated = true;
 
         } catch (InvalidKeyException ex) {
-            LOGGER.warning("Certificate cannot be verified");
+            LOGGER.severe("Certificate cannot be verified");
             kill();
         }
         catch (CertificateException | NoSuchAlgorithmException | NoSuchProviderException | SignatureException | KeyStoreException ex) {
