@@ -28,7 +28,7 @@ public class PGPUtils {
     /**
      * Byte length of specified RSA keys (e.g., 128, 256)
      */
-    static final int RSAByteLength = 128;
+    private static final int RSA_BYTE_LENGTH = 128;
 
     /**
      * Sole class constructor
@@ -231,7 +231,7 @@ public class PGPUtils {
             throws IllegalBlockSizeException, NoSuchPaddingException, NoSuchAlgorithmException, BadPaddingException,
             InvalidAlgorithmParameterException, DataFormatException, SignatureException, KeyException {
         // acquire encrypted session data
-        final byte[] encryptedSessionData = Arrays.copyOfRange(pgpMessage, 0, RSAByteLength);
+        final byte[] encryptedSessionData = Arrays.copyOfRange(pgpMessage, 0, RSA_BYTE_LENGTH);
         // decrypt session data
         final byte[] sessionData = RSADecryption(encryptedSessionData, receiverKey);
         // acquire IV
@@ -243,7 +243,7 @@ public class PGPUtils {
         logger.info("Session key: " + sessionKey.getEncoded().toString());
         logger.info("Session key algorithm: " + sessionKey.getAlgorithm());
         // acquire encrypted compressed message
-        final byte[] encryptedCompressedMessage = Arrays.copyOfRange(pgpMessage, RSAByteLength, pgpMessage.length);
+        final byte[] encryptedCompressedMessage = Arrays.copyOfRange(pgpMessage, RSA_BYTE_LENGTH, pgpMessage.length);
         // decrypt compressed message
         final byte[] decryptedCompressedMessage = AESDecryption(encryptedCompressedMessage, sessionKey, iv);
         // decompress message
@@ -251,12 +251,12 @@ public class PGPUtils {
         final byte[] decompressedMessage = ZIPDecompress(decryptedCompressedMessage);
         logger.info("Decompressed message length: " + decompressedMessage.length);
         // acquire signature
-        final byte[] signature = Arrays.copyOfRange(decompressedMessage, 0, RSAByteLength);
+        final byte[] signature = Arrays.copyOfRange(decompressedMessage, 0, RSA_BYTE_LENGTH);
         // acquire caption length
         final int captionLength = ByteBuffer
-                .wrap(Arrays.copyOfRange(decompressedMessage, RSAByteLength, RSAByteLength + 4)).getInt();
+                .wrap(Arrays.copyOfRange(decompressedMessage, RSA_BYTE_LENGTH, RSA_BYTE_LENGTH + 4)).getInt();
         // acquire message
-        final byte[] messageBytes = Arrays.copyOfRange(decompressedMessage, RSAByteLength + 4,
+        final byte[] messageBytes = Arrays.copyOfRange(decompressedMessage, RSA_BYTE_LENGTH + 4,
                 decompressedMessage.length);
         logger.info("Hashed message: " + SHA256Hash(messageBytes).toString());
         if (!validateSignature(signature, messageBytes, senderKey)) {
