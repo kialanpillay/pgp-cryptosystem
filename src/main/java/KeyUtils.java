@@ -56,7 +56,7 @@ public class KeyUtils {
     }
 
     /**
-     * Generates a 2048-bit key-pair using the RSA algorithm.
+     * Generates a 1024-bit key-pair using the RSA algorithm.
      *
      * @return <code>KeyPair</code>
      */
