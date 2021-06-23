@@ -21,7 +21,7 @@ import java.security.SecureRandom;
 public class KeyUtils {
 
     private static final String DEFAULT_ALGORITHM = "RSA";
-    private static final int DEFAULT_KEY_SIZE = 2048;
+    private static final int DEFAULT_KEY_SIZE = 1024;
 
     /**
      * Sole class constructor
@@ -44,7 +44,7 @@ public class KeyUtils {
     }
 
     /**
-     * Generates a 2048-bit key-pair using the specified cryptographic algorithm.
+     * Generates a 1024-bit key-pair using the specified cryptographic algorithm.
      *
      * @param algorithm algorithm to generate the key-pair
      * @return <code>KeyPair</code>
@@ -57,7 +57,7 @@ public class KeyUtils {
     }
 
     /**
-     * Generates a 2048-bit key-pair using the RSA algorithm.
+     * Generates a 1024-bit key-pair using the RSA algorithm.
      *
      * @return <code>KeyPair</code>
      */
