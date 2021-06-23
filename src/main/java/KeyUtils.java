@@ -1,5 +1,6 @@
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
@@ -73,9 +74,9 @@ public class KeyUtils {
      * @return <code>SecretKey</code>
      */
     public static SecretKey generateSessionKey() throws NoSuchAlgorithmException {
-        final javax.crypto.KeyGenerator keyGenerator = javax.crypto.KeyGenerator.getInstance("AES");
-        keyGenerator.init(128);
-        return keyGenerator.generateKey();
+        final byte[] keyBytes = new byte[16];
+        new SecureRandom().nextBytes(keyBytes);
+        return new SecretKeySpec(keyBytes, 0, keyBytes.length, "AES");
     }
 
     /**
