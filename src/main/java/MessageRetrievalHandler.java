@@ -1,10 +1,7 @@
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.Socket;
 import java.security.*;
 import java.util.Base64;
@@ -69,10 +66,9 @@ public class MessageRetrievalHandler extends Thread {
                     Message m = decode((byte[]) message);
                     byte[] data = Base64.getDecoder().decode(m.getBase64Image());
 
-                    StringBuilder stringBuilder = new StringBuilder(client.getPath());
-                    try (OutputStream stream = new FileOutputStream(stringBuilder.
-                            append(Math.abs(ThreadLocalRandom.current().nextInt())).
-                            append(".png").toString())) {
+                    File directory = new File(client.getPath());
+                    File file = new File(directory, generateFileName());
+                    try (OutputStream stream = new FileOutputStream(file.getAbsolutePath())) {
                         stream.write(data);
                     } catch (IOException ex) {
                         LOGGER.log(Level.WARNING, ex.getMessage());
@@ -95,5 +91,17 @@ public class MessageRetrievalHandler extends Thread {
             NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException,
             BadPaddingException, KeyException, DataFormatException, SignatureException {
         return PGPUtils.PGPDecode(pgpMessage, client.getPrivateKey(), client.getOtherPublicKey(), Client.LOGGER);
+    }
+
+    /**
+     * Generates a random filename using {@link ThreadLocalRandom}
+     *
+     * @return <code>String</code>
+     */
+    private String generateFileName() {
+        StringBuilder stringBuilder = new StringBuilder();
+        return stringBuilder
+                .append(Math.abs(ThreadLocalRandom.current().nextInt()))
+                .append(".png").toString();
     }
 }
