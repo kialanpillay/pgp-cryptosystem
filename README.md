@@ -2,7 +2,7 @@
 ## Pretty Good Privacy (PGP) Cryptosystem
 
 ### Group Members
-1. Aidan Bailey (blyadi001)
+1. Aidan Bailey (blyaid001)
 2. Insaaf Dhansay (dhnins001)
 3. Emily Morris (mrremi007)
 4. Kialan Pillay (pllkia010)
